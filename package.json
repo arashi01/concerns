@@ -28,7 +28,7 @@
     "@atlaskit/modal-dialog": "^14.11.2",
     "@atlaskit/primitives": "^18.0.1",
     "@atlaskit/section-message": "^8.12.7",
-    "@atlaskit/select": "^21.7.8",
+    "@atlaskit/select": "^21.8.0",
     "@atlaskit/spinner": "^19.0.11",
     "@atlaskit/tabs": "^18.3.5",
     "@atlaskit/tag": "^14.5.2",
