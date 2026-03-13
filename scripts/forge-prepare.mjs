@@ -50,6 +50,7 @@ const forgeTsconfig = {
   compilerOptions: {
     strict: true,
     isolatedModules: true,
+    allowJs: true,
     target: 'ES2022',
     module: 'ESNext',
     moduleResolution: 'node',
@@ -57,7 +58,7 @@ const forgeTsconfig = {
     lib: ['ES2022', 'DOM', 'DOM.Iterable'],
     skipLibCheck: true,
   },
-  include: ['src/**/*.ts', 'src/**/*.tsx'],
+  include: ['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js'],
   exclude: ['node_modules', 'static'],
 };
 writeFileSync(join(build, 'tsconfig.json'), JSON.stringify(forgeTsconfig, null, 2) + '\n');
