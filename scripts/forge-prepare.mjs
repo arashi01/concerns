@@ -8,7 +8,7 @@
  * (their type-only domain imports are erased by verbatimModuleSyntax).
  */
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdirSync, rmSync, symlinkSync, readdirSync, unlinkSync, copyFileSync } from 'node:fs';
+import { cpSync, mkdirSync, rmSync, symlinkSync, readdirSync, unlinkSync, copyFileSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -42,6 +42,25 @@ for (const dir of ['resolvers', 'domain']) {
 }
 
 rmSync(tscOut, { recursive: true, force: true });
+
+// Forge-compatible tsconfig — stops ts-loader walking up to the project root.
+// Only affects UI Kit .tsx processing (resolvers/domain are already JS).
+// TS 4.8 cannot parse verbatimModuleSyntax or moduleResolution:"bundler".
+const forgeTsconfig = {
+  compilerOptions: {
+    strict: true,
+    isolatedModules: true,
+    target: 'ES2022',
+    module: 'ESNext',
+    moduleResolution: 'node',
+    jsx: 'react-jsx',
+    lib: ['ES2022', 'DOM', 'DOM.Iterable'],
+    skipLibCheck: true,
+  },
+  include: ['src/**/*.ts', 'src/**/*.tsx'],
+  exclude: ['node_modules', 'static'],
+};
+writeFileSync(join(build, 'tsconfig.json'), JSON.stringify(forgeTsconfig, null, 2) + '\n');
 
 // Scaffolding
 copyFileSync(join(root, 'manifest.yml'), join(build, 'manifest.yml'));
