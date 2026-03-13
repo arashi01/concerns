@@ -161,7 +161,9 @@ jobs:
           path: static/
 
       - name: Install Forge CLI
-        run: npm install -g @forge/cli
+        run: |
+          npm install -g @forge/cli
+          forge settings set usage-analytics false
 
       - name: Deploy to Production
         run: forge deploy -e production --non-interactive
