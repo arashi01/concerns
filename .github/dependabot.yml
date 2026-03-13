@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    open-pull-requests-limit: 10
+    rebase-strategy: auto
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: 'npm'
+    directory: '/'
+    open-pull-requests-limit: 10
+    rebase-strategy: auto
+    schedule:
+      interval: daily
+    groups:
+      atlaskit:
+        patterns:
+          - '@atlaskit/*'
+          - '@compiled/*'
+      forge:
+        patterns:
+          - '@forge/*'
+      dev-dependencies:
+        dependency-type: 'development'

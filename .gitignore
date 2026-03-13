@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build output
+static/
+dist/
+
+# Forge CLI deployment state
+.forge/
+
+# Dotfiles / dotdirs
+.*
+!.github/
+!.gitignore
+!.editorconfig
+!.prettierrc.json
+!.prettierignore
+
+# Documentation
+*.md
+!README.md
+!CONTRIBUTING.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+*.swp
+*.swo
+*~

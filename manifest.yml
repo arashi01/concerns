@@ -1,0 +1,138 @@
+modules:
+  jira:customFieldType:
+    # ── Primary: hierarchical tree select ──
+    - key: concerns-tree-select
+      name: Concerns Tree Select
+      description: A hierarchical multi-level select field with configurable tree data.
+      type: object
+      schema:
+        properties:
+          selections:
+            type: array
+            items:
+              type: object
+              properties:
+                l0:
+                  type: string
+                  searchAlias: Level1
+                l1:
+                  type: string
+                  searchAlias: Level2
+                l2:
+                  type: string
+                  searchAlias: Level3
+                l3:
+                  type: string
+                  searchAlias: Level4
+                l4:
+                  type: string
+                  searchAlias: Level5
+                l5:
+                  type: string
+                  searchAlias: Level6
+      formatter:
+        expression: >
+          value != null && value.selections != null
+          ? value.selections.map(s => s.labels.join(" > ")).join("; ")
+          : ""
+      view:
+        render: native
+        resource: main
+        experience:
+          - issue-view
+          - portal-view
+      edit:
+        resource: edit
+        isInline: true
+        experience:
+          - issue-create
+          - issue-transition
+          - issue-view
+          - portal-request
+      contextConfig:
+        resource: config
+        layout: basic
+        render: native
+      value:
+        function: search-suggestions
+      resolver:
+        function: resolver
+
+    # ── Derived: auto-populated from tree select + annotation bindings ──
+    - key: concerns-derived
+      name: Concerns Derived
+      description: >
+        Derived annotation field that auto-populates from a Concerns Tree Select
+        field. Use for Principals, Managers, or any annotation dimension.
+      type: string
+      collection: list
+      formatter:
+        expression: >
+          value != null ? value.join(", ") : ""
+      view:
+        render: native
+        resource: derived-view
+        experience:
+          - issue-view
+          - portal-view
+      edit:
+        resource: derived-edit
+        experience:
+          - issue-create
+          - issue-transition
+          - issue-view
+      contextConfig:
+        resource: derived-config
+        layout: basic
+        render: native
+      resolver:
+        function: resolver
+
+  jira:adminPage:
+    - key: concerns-admin
+      title: Concerns - Tree Configuration
+      resource: admin
+      resolver:
+        function: resolver
+  trigger:
+    - key: issue-event-trigger
+      function: issue-event-handler
+      events:
+        - avi:jira:created:issue
+        - avi:jira:updated:issue
+  function:
+    - key: resolver
+      handler: resolvers/index.handler
+    - key: search-suggestions
+      handler: resolvers/search-suggestions.handler
+    - key: issue-event-handler
+      handler: resolvers/issue-event.handler
+resources:
+  - key: main
+    path: src/frontend/view/index.tsx
+  - key: edit
+    path: static/edit/build
+  - key: config
+    path: src/frontend/config/index.tsx
+  - key: admin
+    path: static/admin/build
+  - key: derived-view
+    path: src/frontend/derived-view/index.tsx
+  - key: derived-edit
+    path: static/derived-edit/build
+  - key: derived-config
+    path: src/frontend/derived-config/index.tsx
+permissions:
+  scopes:
+    - storage:app
+    - read:jira-work
+    - write:jira-work
+  content:
+    styles:
+      - 'unsafe-inline'
+app:
+  runtime:
+    name: nodejs24.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/b6ec292b-af07-4d5b-9db4-d9d1f03d0ad8

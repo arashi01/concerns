@@ -1,0 +1,199 @@
+name: 'Integration Build'
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+  push:
+    branches: [main]
+    tags: [v*]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_LTS: 24
+
+jobs:
+  static_analysis:
+    name: Static Analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_LTS }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_LTS }}
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Verify Formatting
+        id: format
+        continue-on-error: true
+        run: npm run format:check
+
+      - name: Verify Type Safety
+        id: typecheck
+        continue-on-error: true
+        run: npm run typecheck
+
+      - name: Verify Linting Conformity
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Check for Failures
+        if: always()
+        run: |
+          failed=""
+          [[ "${{ steps.format.outcome }}" == "failure" ]] && failed="$failed format"
+          [[ "${{ steps.typecheck.outcome }}" == "failure" ]] && failed="$failed typecheck"
+          [[ "${{ steps.lint.outcome }}" == "failure" ]] && failed="$failed lint"
+          if [[ -n "$failed" ]]; then
+            echo "::error::Static analysis checks failed:$failed"
+            exit 1
+          fi
+
+  test:
+    name: Execute Tests (Node ${{ matrix.node }})
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [24]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Execute Unit Tests
+        run: npm test
+
+  build:
+    name: Build Custom UI Bundles
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_LTS }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_LTS }}
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build All Bundles
+        run: npm run build:ci
+
+      - name: Upload Build Artefacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: static-bundles
+          path: static/
+          retention-days: 7
+
+  deploy:
+    name: Deploy to Forge
+    needs:
+      - static_analysis
+      - test
+      - build
+    if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: production
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js ${{ env.NODE_LTS }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_LTS }}
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Derive Version from Tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+
+      - name: Download Build Artefacts
+        uses: actions/download-artifact@v7
+        with:
+          name: static-bundles
+          path: static/
+
+      - name: Install Forge CLI
+        run: npm install -g @forge/cli
+
+      - name: Deploy to Production
+        run: forge deploy -e production --non-interactive
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
+
+  release:
+    name: Create GitHub Release
+    needs: [deploy]
+    if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          prerelease_flag=""
+          if [[ "$TAG" == *-* ]]; then
+            prerelease_flag="--prerelease"
+          fi
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --generate-notes \
+            --verify-tag \
+            $prerelease_flag
