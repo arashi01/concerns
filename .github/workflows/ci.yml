@@ -166,7 +166,10 @@ jobs:
           forge settings set usage-analytics false
 
       - name: Deploy to Production
-        run: forge deploy -e production --non-interactive
+        run: |
+          cp tsconfig.json tsconfig.dev.json
+          cp tsconfig.forge.json tsconfig.json
+          forge deploy -e production --non-interactive
         env:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}

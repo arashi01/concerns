@@ -13,17 +13,28 @@ Requires Node.js 24+ and the [Forge CLI](https://developer.atlassian.com/platfor
 ```bash
 npm run typecheck     # tsc --noEmit
 npm run lint          # ESLint
+npm run format        # Prettier --write
+npm run format:check  # Prettier --check (CI gate)
 npm run test          # vitest run (165 tests)
 npm run test:watch    # vitest in watch mode
 npm run build         # Build all 3 Custom UI bundles
 ```
 
-Build runs `typecheck` first (`prebuild` hook). All three must pass before deployment.
+Build runs `typecheck` first (`prebuild` hook). All four static analysis checks (format, typecheck, lint, test) must pass before deployment.
 
 ## Deploy
 
+The Forge CLI bundles resolver functions with an internal TypeScript 4.8 that cannot parse our TS 5.9 tsconfig. Swap in the compatible config before deploying:
+
 ```bash
+cp tsconfig.forge.json tsconfig.json
 forge deploy -e development
+git checkout tsconfig.json
+```
+
+CI handles this swap automatically in the deploy job.
+
+```bash
 forge install --site <site>.atlassian.net --product jira -e development
 forge tunnel          # Local dev proxy (hot-reloads code, not manifest)
 ```
