@@ -14,10 +14,6 @@
     "forceConsistentCasingInFileNames": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "noEmit": true,
     "target": "ES2022",
     // Vite requires "bundler" resolution; NodeNext breaks Custom UI builds (justified exception to ss11)
     "module": "ESNext",

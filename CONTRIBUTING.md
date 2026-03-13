@@ -24,15 +24,14 @@ Build runs `typecheck` first (`prebuild` hook). All four static analysis checks 
 
 ## Deploy
 
-The Forge CLI bundles resolver functions with an internal TypeScript 4.8 that cannot parse our TS 5.9 tsconfig. Swap in the compatible config before deploying:
+The Forge CLI bundles resolver functions with an internal TypeScript 4.8 that cannot parse TS 5.0+ syntax (Zod v4 declarations, `verbatimModuleSyntax`, `moduleResolution: "bundler"`). `forge:prepare` assembles an isolated `forge-build/` directory with pre-compiled resolvers so the Forge bundler only ever sees plain JavaScript. The source tree is never modified.
 
 ```bash
-cp tsconfig.forge.json tsconfig.json
-forge deploy -e development
-git checkout tsconfig.json
+npm run forge:prepare
+cd forge-build && forge deploy -e development
 ```
 
-CI handles this swap automatically in the deploy job.
+CI handles this automatically in the deploy job.
 
 ```bash
 forge install --site <site>.atlassian.net --product jira -e development
@@ -43,7 +42,7 @@ Manifest changes require a redeploy. Scope changes require redeploy + reinstall.
 
 ## Architecture
 
-```
+```text
 src/
 ├── domain/              Pure TypeScript, zero Forge dependencies
 ├── resolvers/           Forge KVS + resolver handlers (impure boundary)

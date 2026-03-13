@@ -4,6 +4,7 @@ node_modules/
 # Build output
 static/
 dist/
+forge-build/
 
 # Forge CLI deployment state
 .forge/

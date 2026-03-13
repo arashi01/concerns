@@ -1,6 +1,7 @@
 node_modules/
 static/
 dist/
+forge-build/
 .forge/
 .ext/
 *.config.*

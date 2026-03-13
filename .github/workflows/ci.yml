@@ -167,8 +167,8 @@ jobs:
 
       - name: Deploy to Production
         run: |
-          cp tsconfig.json tsconfig.dev.json
-          cp tsconfig.forge.json tsconfig.json
+          npm run forge:prepare
+          cd forge-build
           forge deploy -e production --non-interactive
         env:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}

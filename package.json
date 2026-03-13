@@ -13,7 +13,8 @@
     "build:admin": "vite build --config vite.config.admin.ts",
     "build:derived-edit": "vite build --config vite.config.derived-edit.ts",
     "build:ci": "npm run build:edit && npm run build:admin && npm run build:derived-edit",
-    "build": "npm run typecheck && npm run build:ci"
+    "build": "npm run typecheck && npm run build:ci",
+    "forge:prepare": "node scripts/forge-prepare.mjs"
   },
   "dependencies": {
     "@atlaskit/breadcrumbs": "^15.3.20",
