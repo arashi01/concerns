@@ -87,7 +87,10 @@ writeFileSync(
       dependencies: {
         react: depVersion('react'),
         'react-dom': depVersion('react-dom'),
+        '@forge/api': depVersion('@forge/api'),
+        '@forge/kvs': depVersion('@forge/kvs'),
         '@forge/react': depVersion('@forge/react'),
+        '@forge/resolver': depVersion('@forge/resolver'),
       },
     },
     null,
