@@ -2,17 +2,19 @@
  * Read-only view of the hierarchical select field.
  *
  * Renders on issue-view and portal-view using UI Kit (render: native).
- * Displays selected paths as tags within a tag group.
+ * Displays selected paths as condensed breadcrumb lines, merging
+ * sibling selections that share common ancestors onto one line.
  */
 
 import type React from 'react';
 import { useState, useEffect } from 'react';
-import ForgeReconciler, { Tag, TagGroup, Lozenge, Spinner, Stack } from '@forge/react';
+import ForgeReconciler, { Text, Lozenge, Spinner, Stack } from '@forge/react';
 import { view } from '@forge/bridge';
-import type { FieldValue, Selection } from '../../domain/types';
+import type { FieldValue } from '../../domain/types';
+import { FieldValue as FV } from '../../domain/field-value';
 
-/** Format a selection path as a breadcrumb string. */
-const formatSelection = (selection: Selection): string => selection.labels.join(' > ');
+/** Maximum number of breadcrumb lines to display before truncating. */
+const MAX_VISIBLE = 3;
 
 const View = (): React.JSX.Element => {
   const [fieldValue, setFieldValue] = useState<FieldValue | undefined>(undefined);
@@ -37,17 +39,20 @@ const View = (): React.JSX.Element => {
     return <Lozenge appearance="default">None</Lozenge>;
   }
 
-  const MAX_VISIBLE = 3;
-  const visible = fieldValue.selections.slice(0, MAX_VISIBLE);
-  const remaining = fieldValue.selections.length - MAX_VISIBLE;
+  const lines = FV.formatGrouped(fieldValue);
+
+  if (lines.length === 0) {
+    return <Lozenge appearance="default">None</Lozenge>;
+  }
+
+  const visibleLines = lines.slice(0, MAX_VISIBLE);
+  const remaining = lines.length - MAX_VISIBLE;
 
   return (
     <Stack space="space.050">
-      <TagGroup alignment="start">
-        {visible.map((selection, idx) => (
-          <Tag key={idx} text={formatSelection(selection)} />
-        ))}
-      </TagGroup>
+      {visibleLines.map((line, idx) => (
+        <Text key={idx}>{line}</Text>
+      ))}
       {remaining > 0 && <Lozenge appearance="default">{`+${String(remaining)} more`}</Lozenge>}
     </Stack>
   );

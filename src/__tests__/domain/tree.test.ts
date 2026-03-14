@@ -10,6 +10,7 @@ import {
   plot52 as _plot52,
   plot67 as _plot67,
   blockA as _blockA,
+  nairobi as _nairobi,
   testConfig,
   countyLevel as _countyLevel,
   subCountyLevel as _subCountyLevel,
@@ -90,7 +91,7 @@ describe('Tree.childrenOf', () => {
 describe('Tree.topLevel', () => {
   it('returns direct children of the root', () => {
     const top = Tree.topLevel(testConfig);
-    expect(top.map(n => n.label)).toEqual(['Mombasa']);
+    expect(top.map(n => n.label)).toEqual(['Mombasa', 'Nairobi']);
   });
 });
 
@@ -111,7 +112,7 @@ describe('Tree.childrenAtLevel', () => {
 describe('Tree.search', () => {
   it('finds nodes by label substring (case-insensitive)', () => {
     const results = Tree.search(root, 'plot');
-    expect(results.map(n => n.label)).toEqual(['Plot 52/II/MS', 'Plot 67/II/MS']);
+    expect(results.map(n => n.label)).toEqual(['Plot 52/II/MS', 'Plot 67/II/MS', 'Plot 99/III/NB']);
   });
 
   it('finds nodes with partial match', () => {
@@ -120,7 +121,7 @@ describe('Tree.search', () => {
   });
 
   it('returns empty array when nothing matches', () => {
-    expect(Tree.search(root, 'Nairobi')).toEqual([]);
+    expect(Tree.search(root, 'Zanzibar')).toEqual([]);
   });
 });
 
@@ -143,8 +144,8 @@ describe('Tree.searchWithPaths', () => {
 
 describe('Tree.nodeCount', () => {
   it('counts all non-root nodes', () => {
-    // mombasa, mvita, plot52, plot67, blockA, unit1, unit2 = 7
-    expect(Tree.nodeCount(root)).toBe(7);
+    // mombasa, mvita, plot52, plot67, blockA, unit1, unit2, nairobi, westlands, plot99 = 10
+    expect(Tree.nodeCount(root)).toBe(10);
   });
 });
 
@@ -290,5 +291,76 @@ describe('Tree.resolveAnnotations', () => {
     const result = Tree.resolveAnnotations(annotatedConfig, [NodeId.of('unit-1')]);
     expect(result.find(r => r.key === principalKey)?.label).toBe('Principal');
     expect(result.find(r => r.key === managerKey)?.label).toBe('Manager');
+  });
+});
+
+// ---- Tree Filtering ----
+
+describe('Tree.filterTree', () => {
+  it('returns undefined when no nodes match', () => {
+    const result = Tree.filterTree(root, 'zzzzz');
+    expect(result).toBeUndefined();
+  });
+
+  it('matches leaf nodes and includes ancestor chain', () => {
+    const result = Tree.filterTree(root, 'Unit 1');
+    expect(result).toBeDefined();
+    // Root > Mombasa > Mvita > Plot 52 > Block A > Unit 1
+    const labels: string[] = [];
+    const walk = (n: typeof root): void => {
+      labels.push(n.label);
+      for (const c of n.children) walk(c);
+    };
+    walk(result!.root);
+    expect(labels).toContain('Unit 1');
+    expect(labels).toContain('Mombasa');
+    expect(labels).toContain('Block A');
+    // Nairobi branch should be pruned
+    expect(labels).not.toContain('Nairobi');
+  });
+
+  it('is case-insensitive', () => {
+    const result = Tree.filterTree(root, 'mombasa');
+    expect(result).toBeDefined();
+    expect(result!.matchIds.has('mombasa')).toBe(true);
+  });
+
+  it('marks only matching nodes in matchIds', () => {
+    const result = Tree.filterTree(root, 'Mvita');
+    expect(result).toBeDefined();
+    expect(result!.matchIds.has('mvita')).toBe(true);
+    // Mombasa is an ancestor kept for context, not a match
+    expect(result!.matchIds.has('mombasa')).toBe(false);
+  });
+
+  it('matches intermediate nodes', () => {
+    const result = Tree.filterTree(root, 'Mombasa');
+    expect(result).toBeDefined();
+    expect(result!.matchIds.has('mombasa')).toBe(true);
+    // Should not include Nairobi branch
+    const topLabels = result!.root.children.map(c => c.label);
+    expect(topLabels).toContain('Mombasa');
+    expect(topLabels).not.toContain('Nairobi');
+  });
+
+  it('returns multiple branches when both match', () => {
+    // "Plot" matches in both Mombasa and Nairobi branches
+    const result = Tree.filterTree(root, 'Plot');
+    expect(result).toBeDefined();
+    const topLabels = result!.root.children.map(c => c.label);
+    expect(topLabels).toContain('Mombasa');
+    expect(topLabels).toContain('Nairobi');
+    expect(result!.matchIds.has('plot-52')).toBe(true);
+    expect(result!.matchIds.has('plot-67')).toBe(true);
+    expect(result!.matchIds.has('plot-99')).toBe(true);
+  });
+
+  it('prunes non-matching siblings', () => {
+    const result = Tree.filterTree(root, 'Westlands');
+    expect(result).toBeDefined();
+    // Only Nairobi branch should remain
+    expect(result!.root.children).toHaveLength(1);
+    expect(result!.root.children[0]?.label).toBe('Nairobi');
+    expect(result!.matchIds.has('westlands')).toBe(true);
   });
 });

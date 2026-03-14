@@ -13,6 +13,7 @@
 import { TreeStorage } from './tree-storage';
 import { TreeId } from '../domain/tree-id';
 import type { TreeNode } from '../domain/types';
+import { Log } from '../domain/log';
 
 interface ValueFunctionRequest {
   readonly context: {
@@ -62,11 +63,13 @@ export const handler = async (req: ValueFunctionRequest): Promise<ValueResult> =
   const query = (req.context.query ?? '').toLowerCase().trim();
 
   if (config?.treeId === undefined) {
+    Log.debug('searchSuggestions', 'no treeId in config');
     return { results: [] };
   }
 
   const depth = aliasToDepth(alias);
   if (depth === undefined) {
+    Log.debug('searchSuggestions', 'unknown alias', { alias });
     return { results: [] };
   }
 
@@ -75,6 +78,7 @@ export const handler = async (req: ValueFunctionRequest): Promise<ValueResult> =
     return { results: [] };
   }
 
+  Log.debug('searchSuggestions', 'querying', { treeId: config.treeId, alias, query, depth });
   const treeResult = await TreeStorage.getTree(treeId.value);
   return treeResult.match(
     tree => {
@@ -83,6 +87,7 @@ export const handler = async (req: ValueFunctionRequest): Promise<ValueResult> =
       const allLabels = labelsAtDepth(tree.root, depth);
       const filtered = [...allLabels].filter(label => query === '' || label.toLowerCase().includes(query)).sort();
 
+      Log.debug('searchSuggestions', 'results', { count: filtered.length });
       return {
         results: filtered.map(label => ({ label, value: label })),
       };

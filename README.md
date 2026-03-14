@@ -6,7 +6,7 @@ Built on [Atlassian Forge](https://developer.atlassian.com/platform/forge/).
 
 ## What you get
 
-**Tree Select field** — users drill down through your hierarchy and pick one or more nodes at any depth. Selections display as breadcrumb tags.
+**Tree Select field** — users drill down through your hierarchy and pick one or more nodes at any depth. Selections display as condensed breadcrumb lines, grouping sibling leaves that share common ancestors.
 
 **Derived fields** — auto-populated from tree selections. Define annotation dimensions on your tree (e.g. "Principal", "Manager") and Concerns resolves the values automatically when users select nodes. Each derived field is independently searchable in JQL.
 
@@ -121,15 +121,15 @@ On issue create, transition, or inline edit:
 
 1. The Tree Select field shows the top level of your hierarchy
 2. Click a node to select it, or click the arrow to drill into its children
-3. Use the search box to filter nodes at the current level
-4. Selected nodes appear as removable tags showing the full path
+3. Use the search box to find nodes across all levels — matching nodes appear with ancestor context preserved
+4. Selected nodes appear as removable tags showing the full breadcrumb path
 5. Keyboard: Arrow keys to navigate, Enter to select, Right arrow to drill in, Escape to go back
 
 Derived fields update automatically as you change tree selections.
 
 ### Reading values
 
-On issue view and portal view, Tree Select shows breadcrumb tags (e.g. `Mombasa > Mvita > Plot 52`). Derived fields show resolved values as tags.
+On issue view and portal view, Tree Select shows condensed breadcrumb lines using `›` as separator (e.g. `Mombasa › Mvita › Plot 52, Plot 67`). Sibling selections sharing common ancestors are grouped onto one line. Derived fields show resolved values as tags.
 
 In issue navigator, emails, and CSV exports, selections render as semicolon-separated breadcrumbs.
 

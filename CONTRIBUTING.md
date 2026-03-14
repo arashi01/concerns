@@ -15,7 +15,7 @@ npm run typecheck     # tsc --noEmit
 npm run lint          # ESLint
 npm run format        # Prettier --write
 npm run format:check  # Prettier --check (CI gate)
-npm run test          # vitest run (165 tests)
+npm run test          # vitest run
 npm run test:watch    # vitest in watch mode
 npm run build         # Typecheck + build all 3 Custom UI bundles
 ```

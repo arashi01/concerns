@@ -7,7 +7,7 @@
  */
 
 import type { NodeId } from './node-id';
-import type { TreeConfig, Selection, FieldValue as FieldValueData, PathSegment } from './types';
+import type { TreeConfig, Selection, FieldValue as FieldValueData, PathSegment, DisplayNode } from './types';
 import { Tree } from './tree';
 
 /** Re-export the data type so this module is the single canonical source for FieldValue. */
@@ -88,18 +88,134 @@ const selectedNodeIds = (fieldValue: FieldValue): readonly NodeId[] =>
     return last !== undefined ? [last.nodeId] : [];
   });
 
+// ---- Display Grouping ----
+
+/** Mutable trie node used during construction only. */
+interface TrieNode {
+  readonly label: string;
+  readonly depth: number;
+  isLeaf: boolean;
+  readonly children: Map<string, TrieNode>;
+}
+
+/** Convert a mutable trie into an immutable DisplayNode tree. */
+const freezeTrie = (node: TrieNode): DisplayNode => ({
+  label: node.label,
+  depth: node.depth,
+  isLeaf: node.isLeaf,
+  children: [...node.children.values()].map(freezeTrie),
+});
+
 /**
- * Construction, manipulation, and formatting utilities for {@link FieldValue}.
+ * Group selections sharing common ancestors into a display tree.
+ * Returns an array of root-level {@link DisplayNode} entries suitable
+ * for hierarchical rendering in the view UI.
+ */
+const groupSelections = (fieldValue: FieldValue): readonly DisplayNode[] => {
+  const roots = new Map<string, TrieNode>();
+
+  for (const selection of fieldValue.selections) {
+    let siblings = roots;
+    for (let i = 0; i < selection.labels.length; i++) {
+      const label = selection.labels[i];
+      if (label === undefined) continue;
+
+      let node = siblings.get(label);
+      if (node === undefined) {
+        node = { label, depth: i, isLeaf: false, children: new Map() };
+        siblings.set(label, node);
+      }
+      if (i === selection.labels.length - 1) {
+        node.isLeaf = true;
+      }
+      siblings = node.children;
+    }
+  }
+
+  return [...roots.values()].map(freezeTrie);
+};
+
+// ---- Condensed Breadcrumb Formatting ----
+
+/** Visual breadcrumb separator for display. U+203A single right-pointing angle quotation mark. */
+const BREADCRUMB_SEP = ' \u203A ';
+
+/**
+ * Format a field value as condensed breadcrumb lines with leaf grouping.
  *
- * Selection building, add/remove, formatting, and node ID extraction.
+ * Selections sharing a common ancestor path are merged onto one line
+ * with comma-separated leaf labels. Produces one line per distinct
+ * branch rather than one per selection.
+ *
+ * Example: two selections under the same sub-county produce
+ * `["Mombasa \u203A Mvita \u203A Plot 52, Plot 67"]` (single line).
+ */
+const formatGrouped = (fieldValue: FieldValue): readonly string[] => {
+  const roots = groupSelections(fieldValue);
+  const lines: string[] = [];
+
+  const walk = (node: DisplayNode, prefix: string): void => {
+    const path = prefix === '' ? node.label : `${prefix}${BREADCRUMB_SEP}${node.label}`;
+
+    if (node.children.length === 0) {
+      lines.push(path);
+      return;
+    }
+
+    const allChildrenTerminal = node.children.every(c => c.children.length === 0);
+
+    if (allChildrenTerminal) {
+      lines.push(`${path}${BREADCRUMB_SEP}${node.children.map(c => c.label).join(', ')}`);
+      return;
+    }
+
+    for (const child of node.children) {
+      walk(child, path);
+    }
+  };
+
+  for (const root of roots) {
+    walk(root, '');
+  }
+
+  return lines;
+};
+
+/**
+ * Flatten a display tree into a linear list via pre-order traversal.
+ * Each entry carries its depth for indentation-based rendering.
+ */
+const flattenDisplay = (nodes: readonly DisplayNode[]): readonly DisplayNode[] => {
+  const result: DisplayNode[] = [];
+  const walk = (node: DisplayNode): void => {
+    result.push(node);
+    for (const child of node.children) {
+      walk(child);
+    }
+  };
+  for (const node of nodes) {
+    walk(node);
+  }
+  return result;
+};
+
+/**
+ * Construction, manipulation, formatting, and display utilities for {@link FieldValue}.
+ *
+ * Selection building, add/remove, formatting, node ID extraction,
+ * and hierarchical display grouping.
  */
 export const FieldValue = {
   MAX_INDEXED_LEVELS,
+  BREADCRUMB_SEP,
   empty,
   fromNodeIds,
   selectionFromNode,
   addSelection,
   removeSelection,
   format,
+  formatGrouped,
   selectedNodeIds,
+  groupSelections,
+  flattenDisplay,
 } as const;

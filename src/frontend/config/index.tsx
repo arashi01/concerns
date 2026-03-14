@@ -64,13 +64,12 @@ const Config = (): React.JSX.Element => {
     if (selectedTreeId === undefined) return;
     try {
       const fieldConfig = { treeId: selectedTreeId };
-      await view.submit({ configuration: fieldConfig });
-      // Persist to KVS so Custom UI edit modules can read it via the resolver.
-      // contextConfig (render: native) has fieldId in extension context, but
-      // Custom UI edit modules cannot read context configuration directly.
+      // Persist to KVS first - view.submit() may refresh/close the page, so the
+      // KVS bridge must be written before the platform save.
       if (fieldId !== undefined) {
         await invoke('saveFieldConfig', { fieldId, config: fieldConfig });
       }
+      await view.submit({ configuration: fieldConfig });
     } catch (e) {
       setError(`Save failed: ${String(e)}`);
     }

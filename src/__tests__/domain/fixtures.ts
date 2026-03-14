@@ -55,7 +55,10 @@ export const plot52 = mkNode('plot-52', 'Plot 52/II/MS', plotLevel, [blockA], {
 export const plot67 = mkNode('plot-67', 'Plot 67/II/MS', plotLevel, []);
 export const mvita = mkNode('mvita', 'Mvita', subCountyLevel, [plot52, plot67]);
 export const mombasa = mkNode('mombasa', 'Mombasa', countyLevel, [mvita]);
-export const root = mkNode('root', 'Root', LevelId.of('root'), [mombasa]);
+export const plot99 = mkNode('plot-99', 'Plot 99/III/NB', plotLevel, []);
+export const westlands = mkNode('westlands', 'Westlands', subCountyLevel, [plot99]);
+export const nairobi = mkNode('nairobi', 'Nairobi', countyLevel, [westlands]);
+export const root = mkNode('root', 'Root', LevelId.of('root'), [mombasa, nairobi]);
 
 export const testConfig: TreeConfig = {
   id: TreeId.of('test-tree'),

@@ -8,7 +8,7 @@
 import { ok, err, type Result } from 'neverthrow';
 import type { NodeId } from './node-id';
 import type { LevelId } from './level-id';
-import type { TreeNode, TreeConfig, PathSegment, ResolvedAnnotation } from './types';
+import type { TreeNode, TreeConfig, PathSegment, ResolvedAnnotation, FilteredTree } from './types';
 
 // ---- Lookup ----
 
@@ -206,6 +206,47 @@ const hasChildren = (root: TreeNode, nodeId: NodeId): boolean => {
   return node !== undefined && node.children.length > 0;
 };
 
+// ---- Tree Filtering ----
+
+/**
+ * Prune the tree to only branches containing nodes whose labels match the query.
+ * Non-matching leaf branches are removed. Ancestor nodes of matches are retained
+ * for context. Returns `undefined` if no nodes match.
+ */
+const filterTree = (root: TreeNode, query: string): FilteredTree | undefined => {
+  const lowerQuery = query.toLowerCase();
+  const matchIds = new Set<string>();
+
+  const prune = (node: TreeNode): TreeNode | undefined => {
+    const filteredChildren: TreeNode[] = [];
+    for (const child of node.children) {
+      const kept = prune(child);
+      if (kept !== undefined) filteredChildren.push(kept);
+    }
+
+    const matches = node.label.toLowerCase().includes(lowerQuery);
+    if (matches) matchIds.add(node.id as string);
+
+    if (!matches && filteredChildren.length === 0) return undefined;
+
+    return { ...node, children: filteredChildren };
+  };
+
+  // Filter from root's children (root is a virtual container)
+  const filteredChildren: TreeNode[] = [];
+  for (const child of root.children) {
+    const kept = prune(child);
+    if (kept !== undefined) filteredChildren.push(kept);
+  }
+
+  if (filteredChildren.length === 0) return undefined;
+
+  return {
+    root: { ...root, children: filteredChildren },
+    matchIds,
+  };
+};
+
 // ---- Validation ----
 
 /** Verify that all nodes reference valid level IDs. */
@@ -293,6 +334,7 @@ export const Tree = {
   childrenAtLevel,
   search,
   searchWithPaths,
+  filterTree,
   resolveAnnotations,
   nodeCount,
   hasChildren,

@@ -113,6 +113,25 @@ interface ResolvedAnnotation {
   readonly values: readonly string[];
 }
 
+// ---- Filtered Tree (returned by Tree.filterTree for search rendering) ----
+
+/** Result of pruning a tree to only branches containing matching nodes. */
+interface FilteredTree {
+  readonly root: TreeNode;
+  /** Node IDs that directly match the query (vs. ancestors kept for context). */
+  readonly matchIds: ReadonlySet<string>;
+}
+
+// ---- Display Tree (returned by FV.groupSelections for view rendering) ----
+
+/** A node in the grouped display tree for hierarchical rendering. */
+interface DisplayNode {
+  readonly label: string;
+  readonly depth: number;
+  readonly isLeaf: boolean;
+  readonly children: readonly DisplayNode[];
+}
+
 // ---- Field Context Configs ----
 
 /** Configuration for the tree select field instance (contextConfig). */
@@ -136,6 +155,8 @@ export type {
   PathSegment,
   Selection,
   FieldValue,
+  FilteredTree,
+  DisplayNode,
   ResolvedAnnotation,
   SelectFieldConfig,
   DerivedFieldConfig,

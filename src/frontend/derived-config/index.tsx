@@ -98,11 +98,11 @@ const DerivedConfig = (): React.JSX.Element => {
     if (selectedTreeId === undefined || selectedAnnotationKey === undefined) return;
     try {
       const fieldConfig = { treeId: selectedTreeId, annotationKey: selectedAnnotationKey };
-      await view.submit({ configuration: fieldConfig });
-      // Persist to KVS so Custom UI edit modules can read it via the resolver.
+      // Persist to KVS first - view.submit() may refresh/close the page.
       if (fieldId !== undefined) {
         await invoke('saveFieldConfig', { fieldId, config: fieldConfig });
       }
+      await view.submit({ configuration: fieldConfig });
     } catch (e) {
       setError(`Save failed: ${String(e)}`);
     }
