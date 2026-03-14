@@ -101,14 +101,14 @@ Use the visual tree editor in the admin page to add, rename, reorder, or remove 
 
 1. Go to **Jira Settings > Issues > Custom fields > Create custom field**
 2. Select type **Concerns Tree Select** and give it a name (e.g. "Location")
-3. Configure the field context: go to **Jira Settings > Issues > Custom fields**, find the field, click **Configure**, then **Edit custom field config** to select which tree this field uses
+3. Configure the field context: go to **Jira Settings > Fields**, find the field, open its **Actions** menu (**...**), click **Contexts and default values**, then **Edit custom field config** to select which tree this field uses
 4. Add the field to your project's screens if not already visible
 
 ### Derived field
 
 1. Go to **Jira Settings > Issues > Custom fields > Create custom field**
 2. Select type **Concerns Derived** and give it a name (e.g. "Principals")
-3. Configure the field context: click **Configure** on the field, then **Edit custom field config** to select a tree and annotation key (e.g. "principal")
+3. Configure the field context: go to **Jira Settings > Fields**, find the field, open its **Actions** menu (**...**), click **Contexts and default values**, then **Edit custom field config** to select a tree and annotation key (e.g. "principal")
 4. The field auto-populates when users make tree selections - no manual entry needed
 
 Create one Derived field per annotation dimension. For example, if your tree has "principal" and "manager" annotations, create two Derived fields.

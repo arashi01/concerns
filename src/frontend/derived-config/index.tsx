@@ -97,7 +97,7 @@ const DerivedConfig = (): React.JSX.Element => {
   const handleSubmit = async (): Promise<void> => {
     if (selectedTreeId === undefined || selectedAnnotationKey === undefined) return;
     try {
-      await view.submit({ treeId: selectedTreeId, annotationKey: selectedAnnotationKey });
+      await view.submit({ configuration: { treeId: selectedTreeId, annotationKey: selectedAnnotationKey } });
     } catch (e) {
       setError(`Save failed: ${String(e)}`);
     }

@@ -63,7 +63,7 @@ const Config = (): React.JSX.Element => {
   const handleSubmit = async (): Promise<void> => {
     if (selectedTreeId === undefined) return;
     try {
-      await view.submit({ treeId: selectedTreeId });
+      await view.submit({ configuration: { treeId: selectedTreeId } });
     } catch (e) {
       setError(`Save failed: ${String(e)}`);
     }
