@@ -1,13 +1,17 @@
 /**
  * Assemble an isolated build directory for `forge deploy`.
  *
- * Forge CLI v12 bundles TS 4.8 internally, which cannot parse Zod v4
- * declarations or TS 5.0+ tsconfig options. We pre-compile resolvers and
- * domain to JS with our TS 5.9 so Forge's bundler only ever sees plain
- * JavaScript for those layers. UI Kit frontend .tsx files are left intact
- * (their type-only domain imports are erased by verbatimModuleSyntax).
+ * Forge CLI v12 bundles TS 4.8 internally, which cannot parse Zod v4's
+ * .d.cts declarations or TS 5.0+ tsconfig options. We use esbuild to:
+ *   - Bundle resolver entry points with all deps inlined (zod, neverthrow,
+ *     domain) so Forge's webpack never follows imports to Zod.
+ *   - Transpile domain files to JS for UI Kit module resolution (their
+ *     import-type references are erased by ts-loader but the .js must exist).
+ *
+ * UI Kit frontend .tsx files are left intact for Forge's native rendering.
+ * Tests are excluded — Forge must not bundle them.
  */
-import { execFileSync } from 'node:child_process';
+import { buildSync } from 'esbuild';
 import { cpSync, mkdirSync, rmSync, symlinkSync, readdirSync, unlinkSync, copyFileSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,29 +23,48 @@ const build = join(root, 'forge-build');
 rmSync(build, { recursive: true, force: true });
 mkdirSync(build, { recursive: true });
 
-// Source tree (frontend .tsx preserved for Forge UI Kit processing)
-cpSync(join(root, 'src'), join(build, 'src'), { recursive: true });
-
-// Pre-compile resolvers + domain to JS
-const tscOut = join(build, '.tsc');
-execFileSync('npx', ['tsc', '--project', join(root, 'tsconfig.json'), '--outDir', tscOut], {
-  cwd: root,
-  stdio: 'inherit',
+// Source tree (frontend .tsx preserved, tests excluded)
+cpSync(join(root, 'src'), join(build, 'src'), {
+  recursive: true,
+  filter: src => !src.includes('__tests__'),
 });
 
-for (const dir of ['resolvers', 'domain']) {
-  const compiled = join(tscOut, dir);
-  const target = join(build, 'src', dir);
-
-  // Copy compiled JS over
-  for (const f of readdirSync(compiled).filter(f => f.endsWith('.js')))
-    copyFileSync(join(compiled, f), join(target, f));
-
-  // Remove .ts sources (Forge's TS 4.8 must not see them)
-  for (const f of readdirSync(target).filter(f => f.endsWith('.ts'))) unlinkSync(join(target, f));
+// Bundle resolver entry points — inlines zod, neverthrow, and domain code
+// so Forge's TS 4.8 bundler never follows imports to Zod's .d.cts files.
+// @forge/* packages are provided at runtime by the Forge platform.
+for (const entry of ['index', 'search-suggestions', 'issue-event']) {
+  buildSync({
+    entryPoints: [join(root, `src/resolvers/${entry}.ts`)],
+    bundle: true,
+    platform: 'node',
+    target: 'es2022',
+    format: 'esm',
+    external: ['@forge/*'],
+    outfile: join(build, `src/resolvers/${entry}.js`),
+    tsconfig: join(root, 'tsconfig.json'),
+  });
 }
 
-rmSync(tscOut, { recursive: true, force: true });
+// Transpile domain to JS — UI Kit .tsx files reference domain/types via
+// import type. These are erased by ts-loader, but the .js must exist for
+// module resolution. Non-bundled so each file stays independent.
+const domainTs = readdirSync(join(build, 'src/domain')).filter(f => f.endsWith('.ts'));
+if (domainTs.length > 0) {
+  buildSync({
+    entryPoints: domainTs.map(f => join(build, 'src/domain', f)),
+    outdir: join(build, 'src/domain'),
+    platform: 'node',
+    target: 'es2022',
+    format: 'esm',
+    tsconfig: join(root, 'tsconfig.json'),
+  });
+}
+
+// Remove .ts from resolvers + domain (Forge's TS 4.8 must only see JS)
+for (const dir of ['resolvers', 'domain']) {
+  const target = join(build, 'src', dir);
+  for (const f of readdirSync(target).filter(f => f.endsWith('.ts'))) unlinkSync(join(target, f));
+}
 
 // Forge-compatible tsconfig — stops ts-loader walking up to the project root.
 // Only affects UI Kit .tsx processing (resolvers/domain are already JS).
