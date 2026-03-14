@@ -26,7 +26,7 @@ const build = join(root, 'forge-build');
 rmSync(build, { recursive: true, force: true });
 mkdirSync(build, { recursive: true });
 
-// ---- Resolvers (fully bundled, zero external imports) ----
+// ---- Resolvers (bundled, @forge/* external for Forge's runtime) ----
 for (const entry of ['index', 'search-suggestions']) {
   buildSync({
     entryPoints: [join(root, `src/resolvers/${entry}.ts`)],
@@ -34,6 +34,7 @@ for (const entry of ['index', 'search-suggestions']) {
     platform: 'node',
     target: 'es2022',
     format: 'esm',
+    external: ['@forge/*'],
     outfile: join(build, `src/resolvers/${entry}.js`),
     tsconfig: join(root, 'tsconfig.json'),
   });
