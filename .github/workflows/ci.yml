@@ -3,12 +3,11 @@ name: 'Integration Build'
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [devel, main]
     paths-ignore:
       - '**.md'
   push:
-    branches: [main]
-    tags: [v*]
+    branches: [devel, main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -128,54 +127,69 @@ jobs:
       - static_analysis
       - test
       - build
-    if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    environment: production
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    permissions:
+      contents: write
 
     steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - name: Download Build Artefacts
         uses: actions/download-artifact@v7
         with:
           name: forge-build
           path: forge-build/
 
+      - name: Determine Forge Environment
+        id: env
+        run: |
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            echo "forge_env=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "forge_env=development" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install Forge CLI
         run: |
           npm install -g @forge/cli
           forge settings set usage-analytics false
 
-      - name: Deploy to Production
-        run: cd forge-build && forge deploy -e production --non-interactive
+      - name: Deploy
+        run: cd forge-build && forge deploy -e ${{ steps.env.outputs.forge_env }} --non-interactive
         env:
           FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
           FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
 
-  release:
-    name: Create GitHub Release
-    needs: [deploy]
-    if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
+      - name: Determine Release Tag
+        if: github.ref == 'refs/heads/main'
+        id: version
+        run: |
+          forge_major=$(cd forge-build && forge version list --json -e production \
+            | jq -r '.[0].version')
+          if [[ -z "$forge_major" || "$forge_major" == "null" ]]; then
+            echo "::error::Failed to retrieve Forge version"
+            exit 1
+          fi
+          short_sha="${GITHUB_SHA::7}"
+          tag="v${forge_major}.${short_sha}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+        env:
+          FORGE_EMAIL: ${{ secrets.FORGE_EMAIL }}
+          FORGE_API_TOKEN: ${{ secrets.FORGE_API_TOKEN }}
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Create GitHub Release
+      - name: Create Release
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
-          prerelease_flag=""
-          if [[ "$TAG" == *-* ]]; then
-            prerelease_flag="--prerelease"
-          fi
           gh release create "$TAG" \
+            --target "$GITHUB_SHA" \
             --title "$TAG" \
-            --generate-notes \
-            --verify-tag \
-            $prerelease_flag
+            --generate-notes

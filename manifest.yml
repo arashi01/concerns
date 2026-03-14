@@ -94,19 +94,11 @@ modules:
       resource: admin
       resolver:
         function: resolver
-  trigger:
-    - key: issue-event-trigger
-      function: issue-event-handler
-      events:
-        - avi:jira:created:issue
-        - avi:jira:updated:issue
   function:
     - key: resolver
       handler: resolvers/index.handler
     - key: search-suggestions
       handler: resolvers/search-suggestions.handler
-    - key: issue-event-handler
-      handler: resolvers/issue-event.handler
 resources:
   - key: main
     path: src/frontend/view/index.tsx

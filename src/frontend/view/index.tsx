@@ -12,7 +12,7 @@ import { view } from '@forge/bridge';
 import type { FieldValue, Selection } from '../../domain/types';
 
 /** Format a selection path as a breadcrumb string. */
-const formatSelection = (selection: Selection): string => selection.labels.join(' \u203A ');
+const formatSelection = (selection: Selection): string => selection.labels.join(' > ');
 
 const View = (): React.JSX.Element => {
   const [fieldValue, setFieldValue] = useState<FieldValue | undefined>(undefined);

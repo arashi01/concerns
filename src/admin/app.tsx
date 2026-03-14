@@ -160,7 +160,7 @@ export const App: React.FC = () => {
         if ('error' in response) {
           setError(response.error);
         } else {
-          setSuccess(
+          showSuccess(
             `Tree "${response.data.name}" imported (${String(result.value.levels.length)} levels, ${String(result.value.nodes.length)} top-level nodes).`,
           );
           setImportText('');
@@ -178,7 +178,7 @@ export const App: React.FC = () => {
         if ('error' in response) {
           setError(response.error);
         } else {
-          setSuccess(
+          showSuccess(
             `Tree "${response.data.name}" imported (${String(result.value.levels.length)} levels, ${String(result.value.annotations.length)} annotations).`,
           );
           setImportText('');
@@ -428,7 +428,7 @@ export const App: React.FC = () => {
                 <Button
                   appearance="subtle"
                   onClick={() => {
-                    const key = `annotation-${String(Date.now())}`;
+                    const key = `ann-${String(editedAnnotations.length + 1)}`;
                     setEditedAnnotations([
                       ...editedAnnotations,
                       {
@@ -577,18 +577,26 @@ export const App: React.FC = () => {
                 {importFormat === 'annotation-csv' && (
                   <Stack space="space.050">
                     <Heading size="xsmall">Target Tree</Heading>
-                    <select
-                      value={annotationTreeId ?? ''}
-                      onChange={e => setAnnotationTreeId(e.target.value === '' ? undefined : e.target.value)}
-                      style={{ padding: '8px', borderRadius: '3px', border: '1px solid #DFE1E6' }}
-                    >
-                      <option value="">Select a tree to annotate...</option>
-                      {trees.map(t => (
-                        <option key={t.id as string} value={t.id as string}>
-                          {t.name} ({String(t.annotationCount)} annotations)
-                        </option>
-                      ))}
-                    </select>
+                    <Select<{ label: string; value: string }>
+                      inputId="annotation-tree-select"
+                      options={trees.map(t => ({
+                        label: `${t.name} (${String(t.annotationCount)} annotations)`,
+                        value: t.id as string,
+                      }))}
+                      value={
+                        annotationTreeId !== undefined
+                          ? {
+                              label: trees.find(t => (t.id as string) === annotationTreeId)?.name ?? annotationTreeId,
+                              value: annotationTreeId,
+                            }
+                          : null
+                      }
+                      onChange={option => {
+                        setAnnotationTreeId(option !== null ? option.value : undefined);
+                      }}
+                      placeholder="Select a tree to annotate..."
+                      isClearable
+                    />
                   </Stack>
                 )}
 

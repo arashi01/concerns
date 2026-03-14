@@ -52,7 +52,7 @@ Paste or upload a JSON file using the simplified format:
       "level": "county",
       "children": [
         {
-          "label": "Mvita",
+          "label": "Likoni",
           "level": "subcounty",
           "children": [
             { "label": "Plot 52", "level": "plot" },
@@ -99,15 +99,17 @@ Use the visual tree editor in the admin page to add, rename, reorder, or remove 
 
 ### Tree Select field
 
-1. Go to **Project Settings > Fields** (or your field configuration scheme)
-2. Add a custom field of type **Concerns Tree Select**
-3. In the field's context configuration, select which tree this field uses
+1. Go to **Jira Settings > Issues > Custom fields > Create custom field**
+2. Select type **Concerns Tree Select** and give it a name (e.g. "Location")
+3. Configure the field context: go to **Jira Settings > Issues > Custom fields**, find the field, click **Configure**, then **Edit custom field config** to select which tree this field uses
+4. Add the field to your project's screens if not already visible
 
 ### Derived field
 
-1. Add a custom field of type **Concerns Derived**
-2. In context configuration, select a tree and an annotation key (e.g. "principal")
-3. The field auto-populates when users make tree selections — no manual entry needed
+1. Go to **Jira Settings > Issues > Custom fields > Create custom field**
+2. Select type **Concerns Derived** and give it a name (e.g. "Principals")
+3. Configure the field context: click **Configure** on the field, then **Edit custom field config** to select a tree and annotation key (e.g. "principal")
+4. The field auto-populates when users make tree selections - no manual entry needed
 
 Create one Derived field per annotation dimension. For example, if your tree has "principal" and "manager" annotations, create two Derived fields.
 
@@ -224,7 +226,7 @@ Mombasa,Mvita,Plot 52,Block B,,SBS Properties (2016),Omondi
 | Constraint        | Limit   | Notes                                       |
 | ----------------- | ------- | ------------------------------------------- |
 | Hierarchy depth   | 6       | 6 JQL-searchable levels (Level1–Level6)     |
-| Tree size         | 240 KiB | Forge KVS per-key limit                     |
+| Tree size         | 200 KiB | Forge KVS per-key limit                     |
 | Selections        | No cap  | Practical limit is display space            |
 | Annotation keys   | No cap  | Each requires a corresponding Derived field |
 | Trees per install | No cap  | Each tree is a separate storage key         |

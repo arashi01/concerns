@@ -130,7 +130,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({
           {/* Expand/collapse toggle */}
           {hasChildren ? (
             <Button appearance="subtle" spacing="compact" onClick={() => setExpanded(!expanded)}>
-              {expanded ? '▼' : '▶'}
+              {expanded ? '\u25BC' : '\u25B6'}
             </Button>
           ) : (
             <Box xcss={styles.emptyToggle} />
@@ -194,10 +194,10 @@ const NodeEditor: React.FC<NodeEditorProps> = ({
 
           {/* Action buttons */}
           <Button appearance="subtle" spacing="compact" onClick={() => handleMove('up')}>
-            ↑
+            {'\u2191'}
           </Button>
           <Button appearance="subtle" spacing="compact" onClick={() => handleMove('down')}>
-            ↓
+            {'\u2193'}
           </Button>
           {childLevel !== undefined && (
             <Button appearance="subtle" spacing="compact" onClick={() => setAddingChild(!addingChild)}>
@@ -215,7 +215,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({
             </Inline>
           ) : (
             <Button appearance="subtle" spacing="compact" onClick={() => setConfirmDelete(true)}>
-              ✕
+              {'\u2715'}
             </Button>
           )}
         </Inline>

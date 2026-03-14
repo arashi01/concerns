@@ -21,6 +21,7 @@ import { cssMap, cx } from '@atlaskit/css';
 import type { TreeConfig, TreeNode, FieldValue, SelectFieldConfig, Selection } from '../../domain/types';
 import type { NodeId } from '../../domain/node-id';
 import { FieldValue as FV } from '../../domain/field-value';
+import { Tree } from '../../domain/tree';
 
 type ResolverResponse<T> = { readonly data: T } | { readonly error: string };
 
@@ -28,7 +29,7 @@ type ResolverResponse<T> = { readonly data: T } | { readonly error: string };
 const LAZY_THRESHOLD = 500;
 
 /** Format a selection as a breadcrumb string. */
-const formatBreadcrumb = (selection: Selection): string => selection.labels.join(' \u203A ');
+const formatBreadcrumb = (selection: Selection): string => selection.labels.join(' > ');
 
 // ---- Styles ----
 
@@ -70,7 +71,9 @@ export const App: React.FC = () => {
         // Load tree config from context configuration
         const config = ext?.['configuration'] as SelectFieldConfig | undefined;
         if (config?.treeId === undefined) {
-          setError('No tree configuration assigned. Configure this field in admin settings.');
+          setError(
+            'Field not configured. A Jira admin must assign a tree: go to Jira Settings > Issues > Custom fields, find this field, then Contexts and default values > Edit custom field config.',
+          );
           setLoading(false);
           return;
         }
@@ -80,17 +83,15 @@ export const App: React.FC = () => {
         });
 
         if ('error' in treeResponse) {
-          setError(treeResponse.error);
+          const msg =
+            treeResponse.error === 'Tree not found'
+              ? 'The configured tree no longer exists. A Jira admin must update the field context configuration to select a valid tree.'
+              : treeResponse.error;
+          setError(msg);
         } else {
           const treeData = treeResponse.data;
           setTree(treeData);
-          // Use lazy navigation for large trees
-          const totalNodes = treeData.root.children.reduce(
-            (sum, _) => sum + 1, // count is approximate from top level
-            0,
-          );
-          // Check against a rough estimate; the summary nodeCount is more accurate
-          // but we already have the full tree loaded at this point
+          const totalNodes = Tree.nodeCount(treeData.root);
           const isLazy = treeData.levels.length > 3 && totalNodes > LAZY_THRESHOLD;
           setLazy(isLazy);
           setCurrentChildren(treeData.root.children);

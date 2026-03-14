@@ -22,15 +22,47 @@ npm run build         # Typecheck + build all 3 Custom UI bundles
 
 `build` runs typecheck first locally. In CI (`CI=true`), typecheck is skipped since it runs in a dedicated job.
 
+## Branching and release
+
+| Branch  | Purpose                    | CI behaviour                                   |
+| ------- | -------------------------- | ---------------------------------------------- |
+| `devel` | Primary development branch | Static analysis + tests + build + deploy (dev) |
+| `main`  | Production releases        | Full pipeline + deploy (prod) + GitHub release |
+
+PRs target `devel`. Every push to `devel` deploys to the Forge development environment for testing. When ready to release, merge `devel` into `main` - this deploys to Forge production and creates a GitHub release automatically.
+
+### Versioning
+
+Forge auto-manages app versions (integer major, starting at 1). Major bumps are triggered by scope or permission changes in the manifest; all other deploys are minor bumps within the current major. Developers cannot set the Forge version number.
+
+GitHub release tags use the format `v<forge_major>.<short_sha>` (e.g. `v2.abc1234`), combining the Forge major version with the git commit SHA. This ensures immutable, traceable releases without version drift.
+
+```bash
+forge version list --json -e production   # Check current Forge version
+```
+
 ## Deploy
 
-The Forge CLI bundles resolver functions with an internal TypeScript 4.8 that cannot parse TS 5.0+ syntax (Zod v4 declarations, `verbatimModuleSyntax`, `moduleResolution: "bundler"`). The `forge:*` scripts handle everything — typecheck, build Custom UI bundles, assemble an isolated `forge-build/` directory with pre-compiled JS, install shared deps, and run the Forge CLI. The source tree is never modified.
+The Forge CLI bundles resolver functions with an internal TypeScript 4.8 that cannot parse TS 5.0+ syntax (Zod v4 declarations, `verbatimModuleSyntax`, `moduleResolution: "bundler"`). The `forge:*` scripts handle everything - typecheck, build Custom UI bundles, assemble an isolated `forge-build/` directory with pre-compiled JS, install shared deps, and run the Forge CLI. The source tree is never modified.
+
+### Manual deploy (development)
 
 ```bash
 npm run forge:deploy:dev    # Full build + deploy to development
-npm run forge:deploy        # Full build + deploy to production
 npm run forge:tunnel        # Full build + start local dev tunnel
 ```
+
+### Production release
+
+Production deploys are handled by CI on push to `main`. Use the release script from the `devel` branch:
+
+```bash
+./release    # Verify, merge devel into main, push (triggers CI deploy + GitHub release)
+```
+
+Do not deploy to production manually or push to `main` directly.
+
+### First install
 
 After first deploy, install the app:
 
@@ -152,7 +184,7 @@ Test fixtures live in `src/__tests__/domain/fixtures.ts` — shared tree configs
 
 ## Storage model
 
-Each tree is a single KVS document at key `tree:{id}` (max 240 KiB). A metadata index at `meta:trees` stores `TreeSummary` entries for listing without loading full trees.
+Each tree is a single KVS document at key `tree:{id}` (max 200 KiB). A metadata index at `meta:trees` stores `TreeSummary` entries for listing without loading full trees.
 
 `saveTree` auto-increments the version field and rejects version mismatches (optimistic concurrency). The TOCTOU window is acceptable for admin-frequency operations.
 

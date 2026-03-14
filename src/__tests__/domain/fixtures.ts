@@ -30,7 +30,7 @@ const mkNode = (
   id: string,
   label: string,
   levelId: LevelId,
-  children: readonly TreeNode[] = [],
+  children: readonly TreeNode[],
   opts?: {
     metadata?: Readonly<Record<string, string>>;
     annotations?: Readonly<Record<string, readonly string[]>>;
@@ -46,13 +46,13 @@ const mkNode = (
 
 // ---- Plain tree (no annotations) ----
 
-export const unit1 = mkNode('unit-1', 'Unit 1', unitLevel);
-export const unit2 = mkNode('unit-2', 'Unit 2', unitLevel);
+export const unit1 = mkNode('unit-1', 'Unit 1', unitLevel, []);
+export const unit2 = mkNode('unit-2', 'Unit 2', unitLevel, []);
 export const blockA = mkNode('block-a', 'Block A', buildingLevel, [unit1, unit2]);
 export const plot52 = mkNode('plot-52', 'Plot 52/II/MS', plotLevel, [blockA], {
   metadata: { lrNumber: 'CR/12345' },
 });
-export const plot67 = mkNode('plot-67', 'Plot 67/II/MS', plotLevel);
+export const plot67 = mkNode('plot-67', 'Plot 67/II/MS', plotLevel, []);
 export const mvita = mkNode('mvita', 'Mvita', subCountyLevel, [plot52, plot67]);
 export const mombasa = mkNode('mombasa', 'Mombasa', countyLevel, [mvita]);
 export const root = mkNode('root', 'Root', LevelId.of('root'), [mombasa]);
@@ -82,8 +82,8 @@ export const annotationDefs: readonly AnnotationDefinition[] = [
   { key: managerKey, label: 'Manager', resolution: 'nearest' },
 ];
 
-export const annUnit1 = mkNode('unit-1', 'Unit 1', unitLevel);
-export const annUnit2 = mkNode('unit-2', 'Unit 2', unitLevel);
+export const annUnit1 = mkNode('unit-1', 'Unit 1', unitLevel, []);
+export const annUnit2 = mkNode('unit-2', 'Unit 2', unitLevel, []);
 export const annBlockA = mkNode('block-a', 'Block A', buildingLevel, [annUnit1, annUnit2], {
   annotations: { principal: ['SBS Properties Ltd', 'SBS Properties (2016)'] },
 });

@@ -20,7 +20,6 @@ import ForgeReconciler, {
   Spinner,
   SectionMessage,
   Text,
-  Stack,
 } from '@forge/react';
 import { invoke, view } from '@forge/bridge';
 import type { TreeSummary, TreeConfig, DerivedFieldConfig } from '../../domain/types';
@@ -95,14 +94,14 @@ const DerivedConfig = (): React.JSX.Element => {
     [loadAnnotationKeys],
   );
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = async (): Promise<void> => {
     if (selectedTreeId === undefined || selectedAnnotationKey === undefined) return;
-    await view.submit({ treeId: selectedTreeId, annotationKey: selectedAnnotationKey });
-  }, [selectedTreeId, selectedAnnotationKey]);
-
-  const handleClose = useCallback(async () => {
-    await view.close();
-  }, []);
+    try {
+      await view.submit({ treeId: selectedTreeId, annotationKey: selectedAnnotationKey });
+    } catch (e) {
+      setError(`Save failed: ${String(e)}`);
+    }
+  };
 
   if (loading) {
     return <Spinner size="medium" />;
@@ -122,6 +121,16 @@ const DerivedConfig = (): React.JSX.Element => {
     value: t.id as string,
   }));
 
+  if (treeOptions.length === 0) {
+    return (
+      <SectionMessage appearance="information" title="No trees available">
+        <Text>
+          Create a tree first in the Concerns admin page (Jira Settings &gt; Apps &gt; Concerns - Tree Configuration).
+        </Text>
+      </SectionMessage>
+    );
+  }
+
   const annotationOptions = annotationKeys.map(a => ({
     label: a.label,
     value: a.key,
@@ -133,6 +142,7 @@ const DerivedConfig = (): React.JSX.Element => {
         <Label labelFor="tree-select">Tree Configuration</Label>
         <Select
           inputId="tree-select"
+          name="treeId"
           options={treeOptions}
           value={treeOptions.find(o => o.value === selectedTreeId)}
           onChange={handleTreeChange}
@@ -144,6 +154,7 @@ const DerivedConfig = (): React.JSX.Element => {
           <Label labelFor="annotation-select">Annotation Dimension</Label>
           <Select
             inputId="annotation-select"
+            name="annotationKey"
             options={annotationOptions}
             value={annotationOptions.find(o => o.value === selectedAnnotationKey)}
             onChange={option => {
@@ -156,23 +167,13 @@ const DerivedConfig = (): React.JSX.Element => {
         </FormSection>
       )}
       <FormFooter>
-        <Stack space="space.100">
-          <Button
-            appearance="primary"
-            type="submit"
-            isDisabled={selectedTreeId === undefined || selectedAnnotationKey === undefined}
-          >
-            Save
-          </Button>
-          <Button
-            appearance="subtle"
-            onClick={() => {
-              void handleClose();
-            }}
-          >
-            Cancel
-          </Button>
-        </Stack>
+        <Button
+          appearance="primary"
+          type="submit"
+          isDisabled={selectedTreeId === undefined || selectedAnnotationKey === undefined}
+        >
+          Save
+        </Button>
       </FormFooter>
     </Form>
   );

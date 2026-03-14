@@ -49,7 +49,9 @@ export const App: React.FC = () => {
         // Load derived field configuration
         const config = ext?.['configuration'] as DerivedFieldConfig | undefined;
         if (config === undefined) {
-          setError('Derived field not configured. Set tree and annotation key in field settings.');
+          setError(
+            'Field not configured. A Jira admin must assign a tree and annotation key: go to Jira Settings > Issues > Custom fields, find this field, then Contexts and default values > Edit custom field config.',
+          );
           setLoading(false);
           return;
         }
@@ -62,7 +64,11 @@ export const App: React.FC = () => {
         });
 
         if ('error' in treeResponse) {
-          setError(treeResponse.error);
+          const msg =
+            treeResponse.error === 'Tree not found'
+              ? 'The configured tree no longer exists. A Jira admin must update the field context configuration to select a valid tree.'
+              : treeResponse.error;
+          setError(msg);
         } else {
           setTreeConfig(treeResponse.data);
         }

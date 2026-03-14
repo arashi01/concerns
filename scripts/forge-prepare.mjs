@@ -27,7 +27,7 @@ rmSync(build, { recursive: true, force: true });
 mkdirSync(build, { recursive: true });
 
 // ---- Resolvers (fully bundled, zero external imports) ----
-for (const entry of ['index', 'search-suggestions', 'issue-event']) {
+for (const entry of ['index', 'search-suggestions']) {
   buildSync({
     entryPoints: [join(root, `src/resolvers/${entry}.ts`)],
     bundle: true,

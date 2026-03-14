@@ -7,7 +7,7 @@
  */
 
 import type React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import ForgeReconciler, {
   Form,
   FormSection,
@@ -18,7 +18,6 @@ import ForgeReconciler, {
   Spinner,
   SectionMessage,
   Text,
-  Stack,
 } from '@forge/react';
 import { invoke, view } from '@forge/bridge';
 import type { TreeSummary, SelectFieldConfig } from '../../domain/types';
@@ -61,14 +60,14 @@ const Config = (): React.JSX.Element => {
     void load();
   }, []);
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = async (): Promise<void> => {
     if (selectedTreeId === undefined) return;
-    await view.submit({ treeId: selectedTreeId });
-  }, [selectedTreeId]);
-
-  const handleClose = useCallback(async () => {
-    await view.close();
-  }, []);
+    try {
+      await view.submit({ treeId: selectedTreeId });
+    } catch (e) {
+      setError(`Save failed: ${String(e)}`);
+    }
+  };
 
   if (loading) {
     return <Spinner size="medium" />;
@@ -88,12 +87,23 @@ const Config = (): React.JSX.Element => {
     value: t.id as string,
   }));
 
+  if (options.length === 0) {
+    return (
+      <SectionMessage appearance="information" title="No trees available">
+        <Text>
+          Create a tree first in the Concerns admin page (Jira Settings &gt; Apps &gt; Concerns - Tree Configuration).
+        </Text>
+      </SectionMessage>
+    );
+  }
+
   return (
     <Form onSubmit={handleSubmit}>
       <FormSection>
         <Label labelFor="tree-select">Tree Configuration</Label>
         <Select
           inputId="tree-select"
+          name="treeId"
           options={options}
           value={options.find(o => o.value === selectedTreeId)}
           onChange={option => {
@@ -105,19 +115,9 @@ const Config = (): React.JSX.Element => {
         />
       </FormSection>
       <FormFooter>
-        <Stack space="space.100">
-          <Button appearance="primary" type="submit" isDisabled={selectedTreeId === undefined}>
-            Save
-          </Button>
-          <Button
-            appearance="subtle"
-            onClick={() => {
-              void handleClose();
-            }}
-          >
-            Cancel
-          </Button>
-        </Stack>
+        <Button appearance="primary" type="submit" isDisabled={selectedTreeId === undefined}>
+          Save
+        </Button>
       </FormFooter>
     </Form>
   );
