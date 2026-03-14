@@ -17,25 +17,25 @@ npm run format        # Prettier --write
 npm run format:check  # Prettier --check (CI gate)
 npm run test          # vitest run (165 tests)
 npm run test:watch    # vitest in watch mode
-npm run build         # Build all 3 Custom UI bundles
+npm run build         # Typecheck + build all 3 Custom UI bundles
 ```
 
-Build runs `typecheck` first (`prebuild` hook). All four static analysis checks (format, typecheck, lint, test) must pass before deployment.
+`build` runs typecheck first locally. In CI (`CI=true`), typecheck is skipped since it runs in a dedicated job.
 
 ## Deploy
 
-The Forge CLI bundles resolver functions with an internal TypeScript 4.8 that cannot parse TS 5.0+ syntax (Zod v4 declarations, `verbatimModuleSyntax`, `moduleResolution: "bundler"`). `forge:prepare` assembles an isolated `forge-build/` directory with pre-compiled resolvers so the Forge bundler only ever sees plain JavaScript. The source tree is never modified.
+The Forge CLI bundles resolver functions with an internal TypeScript 4.8 that cannot parse TS 5.0+ syntax (Zod v4 declarations, `verbatimModuleSyntax`, `moduleResolution: "bundler"`). The `forge:*` scripts handle everything — typecheck, build Custom UI bundles, assemble an isolated `forge-build/` directory with pre-compiled JS, install shared deps, and run the Forge CLI. The source tree is never modified.
 
 ```bash
-npm run forge:prepare
-cd forge-build && forge deploy -e development
+npm run forge:deploy:dev    # Full build + deploy to development
+npm run forge:deploy        # Full build + deploy to production
+npm run forge:tunnel        # Full build + start local dev tunnel
 ```
 
-CI handles this automatically in the deploy job.
+After first deploy, install the app:
 
 ```bash
 forge install --site <site>.atlassian.net --product jira -e development
-forge tunnel          # Local dev proxy (hot-reloads code, not manifest)
 ```
 
 Manifest changes require a redeploy. Scope changes require redeploy + reinstall.

@@ -3,7 +3,7 @@ import { FieldValue as FV } from '../../domain/field-value';
 import { NodeId } from '../../domain/node-id';
 import { testConfig } from './fixtures';
 
-// ──── Tests ────
+// ---- Tests ----
 
 describe('FieldValue.empty', () => {
   it('has no selections', () => {

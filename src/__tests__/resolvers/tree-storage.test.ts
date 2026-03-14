@@ -3,14 +3,14 @@
  *
  * Mocks @forge/kvs to test storage operations in isolation.
  * Domain logic (tree validation, annotation resolution) is tested
- * in the domain test suite — these tests focus on KVS interactions,
+ * in the domain test suite - these tests focus on KVS interactions,
  * error handling, size limits, and data validation on read.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
 
-// ──── Mock @forge/kvs ────
+// ---- Mock @forge/kvs ----
 
 const mockGet = vi.fn();
 const mockSet = vi.fn();
@@ -31,7 +31,7 @@ import { NodeId } from '../../domain/node-id';
 import { LevelId } from '../../domain/level-id';
 import type { TreeConfig, TreeSummary } from '../../domain/types';
 
-// ──── Helpers ────
+// ---- Helpers ----
 
 const treeId = testConfig.id;
 const treeKey = `tree:${treeId as string}`;
@@ -53,7 +53,7 @@ beforeEach(() => {
   mockDelete.mockResolvedValue(undefined);
 });
 
-// ──── getTree ────
+// ---- getTree ----
 
 describe('TreeStorage.getTree', () => {
   it('returns the parsed tree when KVS has valid data', async () => {
@@ -98,7 +98,7 @@ describe('TreeStorage.getTree', () => {
   });
 });
 
-// ──── listTrees ────
+// ---- listTrees ----
 
 describe('TreeStorage.listTrees', () => {
   it('returns validated summaries from meta', async () => {
@@ -134,7 +134,7 @@ describe('TreeStorage.listTrees', () => {
 
     expect(result.isOk()).toBe(true);
     // Both valid summaries have the same id ('test-tree'), so dedup
-    // doesn't happen here — Zod validates shape, not uniqueness.
+    // doesn't happen here - Zod validates shape, not uniqueness.
     // The corrupted entry is filtered out.
     expect(result._unsafeUnwrap()).toHaveLength(2);
   });
@@ -148,7 +148,7 @@ describe('TreeStorage.listTrees', () => {
   });
 });
 
-// ──── saveTree ────
+// ---- saveTree ----
 
 describe('TreeStorage.saveTree', () => {
   it('saves a new tree (no existing) and bumps version', async () => {
@@ -161,7 +161,7 @@ describe('TreeStorage.saveTree', () => {
     expect(result.isOk()).toBe(true);
     const saved = result._unsafeUnwrap();
     expect(saved.name).toBe('Test Property Hierarchy');
-    // Version bumped from 1 → 2
+    // Version bumped from 1 -> 2
     expect(saved.version).toBe(2);
 
     // First set: tree data (with bumped version)
@@ -276,7 +276,7 @@ describe('TreeStorage.saveTree', () => {
     expect(metaCall).toBeDefined();
     const savedMeta = metaCall?.[1] as TreeSummary[];
     expect(savedMeta).toHaveLength(1);
-    // Version bumped from 1 → 2
+    // Version bumped from 1 -> 2
     expect(savedMeta[0]?.version).toBe(2);
   });
 
@@ -293,7 +293,7 @@ describe('TreeStorage.saveTree', () => {
   });
 });
 
-// ──── deleteTree ────
+// ---- deleteTree ----
 
 describe('TreeStorage.deleteTree', () => {
   it('deletes tree data and removes from meta', async () => {
@@ -317,7 +317,7 @@ describe('TreeStorage.deleteTree', () => {
     expect(result._unsafeUnwrapErr()).toContain('Storage delete failed');
   });
 
-  it('handles meta containing other trees — only removes target', async () => {
+  it('handles meta containing other trees - only removes target', async () => {
     const otherSummary: TreeSummary = {
       ...makeSummary(testConfig),
       id: TreeId.of('other-tree'),

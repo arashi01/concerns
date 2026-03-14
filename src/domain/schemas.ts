@@ -3,7 +3,7 @@
  *
  * Used at system boundaries: parsing imported JSON, validating resolver
  * payloads, and deserialising KVS data. The domain layer itself uses
- * TypeScript types — Zod validates at the edges.
+ * TypeScript types - Zod validates at the edges.
  */
 
 import { z } from 'zod';
@@ -13,14 +13,14 @@ import { LevelId } from './level-id';
 import { AnnotationKey } from './annotation-key';
 import type { TreeNode } from './types';
 
-// ──── Primitives ────
+// ---- Primitives ----
 
 const nodeIdSchema = NodeId.schema;
 const treeIdSchema = TreeId.schema;
 const levelIdSchema = LevelId.schema;
 const annotationKeySchema = AnnotationKey.schema;
 
-// ──── Annotations ────
+// ---- Annotations ----
 
 const resolutionStrategySchema = z.enum(['union', 'nearest', 'explicit']);
 
@@ -30,7 +30,7 @@ const annotationDefinitionSchema = z.object({
   resolution: resolutionStrategySchema,
 });
 
-// ──── Tree Configuration ────
+// ---- Tree Configuration ----
 
 const levelDefinitionSchema = z.object({
   id: levelIdSchema,
@@ -65,7 +65,7 @@ const treeConfigSchema = z.object({
   root: treeNodeSchema,
 });
 
-// ──── Tree Summary (meta index entries read from KVS) ────
+// ---- Tree Summary (meta index entries read from KVS) ----
 
 const treeSummarySchema = z.object({
   id: treeIdSchema,
@@ -76,7 +76,7 @@ const treeSummarySchema = z.object({
   annotationCount: z.number(),
 });
 
-// ──── Field Value ────
+// ---- Field Value ----
 
 const pathSegmentSchema = z.object({
   levelId: levelIdSchema,
@@ -99,7 +99,7 @@ const fieldValueSchema = z.object({
   selections: z.array(selectionSchema),
 });
 
-// ──── Context Configs ────
+// ---- Context Configs ----
 
 const selectFieldConfigSchema = z.object({
   treeId: treeIdSchema,
@@ -110,7 +110,7 @@ const derivedFieldConfigSchema = z.object({
   annotationKey: annotationKeySchema,
 });
 
-// ──── Import Format (user-provided JSON for tree data) ────
+// ---- Import Format (user-provided JSON for tree data) ----
 
 /**
  * Simplified import format: users provide nodes without requiring

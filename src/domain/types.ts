@@ -3,7 +3,7 @@ import type { TreeId } from './tree-id';
 import type { LevelId } from './level-id';
 import type { AnnotationKey } from './annotation-key';
 
-// ──── Tree Configuration (stored in Forge KVS) ────
+// ---- Tree Configuration (stored in Forge KVS) ----
 
 /** Defines a single level type within the hierarchy (e.g. "County", "Plot"). */
 interface LevelDefinition {
@@ -73,7 +73,7 @@ interface TreeSummary {
   readonly annotationCount: number;
 }
 
-// ──── Field Value (stored on each Jira issue) ────
+// ---- Field Value (stored on each Jira issue) ----
 
 /** A single segment in a selection path. */
 interface PathSegment {
@@ -86,7 +86,7 @@ interface PathSegment {
  * One complete selection within the field.
  *
  * `path` is the full breadcrumb from root to the selected node.
- * `l0`–`l5` are denormalised labels for JQL indexing via searchAlias.
+ * `l0`-`l5` are denormalised labels for JQL indexing via searchAlias.
  */
 interface Selection {
   readonly path: readonly PathSegment[];
@@ -104,7 +104,7 @@ interface FieldValue {
   readonly selections: readonly Selection[];
 }
 
-// ──── Annotation Resolution (returned by Tree.resolveAnnotations) ────
+// ---- Annotation Resolution (returned by Tree.resolveAnnotations) ----
 
 /** The resolved values for a single annotation dimension across all selections. */
 interface ResolvedAnnotation {
@@ -113,7 +113,7 @@ interface ResolvedAnnotation {
   readonly values: readonly string[];
 }
 
-// ──── Field Context Configs ────
+// ---- Field Context Configs ----
 
 /** Configuration for the tree select field instance (contextConfig). */
 interface SelectFieldConfig {

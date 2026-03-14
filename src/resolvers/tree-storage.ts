@@ -2,7 +2,7 @@
  * Tree configuration persistence via Forge Storage.
  *
  * This module is the sole impure boundary for tree data.
- * All storage operations are confined here — the domain layer
+ * All storage operations are confined here - the domain layer
  * never touches storage directly.
  */
 
@@ -13,7 +13,7 @@ import type { TreeId } from '../domain/tree-id';
 import { Tree } from '../domain/tree';
 import { Schemas } from '../domain/schemas';
 
-// ──── Constants ────
+// ---- Constants ----
 
 const treeKey = (id: TreeId): string => `tree:${id as string}`;
 const META_KEY = 'meta:trees';
@@ -21,7 +21,7 @@ const META_KEY = 'meta:trees';
 /** Forge KVS per-value size limit (200 KiB). */
 const KVS_MAX_BYTES = 200 * 1024;
 
-// ──── Read ────
+// ---- Read ----
 
 const getTree = (id: TreeId): ResultAsync<TreeConfig | undefined, string> =>
   ResultAsync.fromPromise(kvs.get(treeKey(id)), e => `Storage read failed: ${String(e)}`).andThen(raw => {
@@ -43,7 +43,7 @@ const listTrees = (): ResultAsync<readonly TreeSummary[], string> =>
     return validated;
   });
 
-// ──── Write ────
+// ---- Write ----
 
 const saveTree = (config: TreeConfig): ResultAsync<TreeConfig, string> => {
   const validation = Tree.validate(config);
@@ -80,7 +80,7 @@ const deleteTree = (id: TreeId): ResultAsync<void, string> =>
     removeMeta(id),
   );
 
-// ──── Meta Index ────
+// ---- Meta Index ----
 
 const updateMeta = (config: TreeConfig): ResultAsync<void, string> =>
   listTrees().andThen(summaries => {

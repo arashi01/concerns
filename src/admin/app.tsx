@@ -31,7 +31,7 @@ type ImportFormat = 'json' | 'tree-csv' | 'combined-csv' | 'annotation-csv';
 
 type ResolverResponse<T> = { readonly data: T } | { readonly error: string };
 
-// ──── Styles ────
+// ---- Styles ----
 
 const styles = cssMap({
   page: { padding: 'var(--ds-space-400)', maxWidth: '960px' },
@@ -286,7 +286,7 @@ export const App: React.FC = () => {
     setTreeModified(true);
   }, []);
 
-  // ──── Table definition ────
+  // ---- Table definition ----
 
   const tableHead = {
     cells: [
@@ -328,7 +328,7 @@ export const App: React.FC = () => {
     ],
   }));
 
-  // ──── Render ────
+  // ---- Render ----
 
   return (
     <Box xcss={styles.page}>

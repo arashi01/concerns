@@ -27,7 +27,7 @@ import { LevelId } from '../../domain/level-id';
 import { AnnotationKey } from '../../domain/annotation-key';
 import type { TreeNode } from '../../domain/types';
 
-// ──── addNode ────
+// ---- addNode ----
 
 describe('TreeMutate.addNode', () => {
   it('adds a child to the specified parent', () => {
@@ -74,7 +74,7 @@ describe('TreeMutate.addNode', () => {
   });
 });
 
-// ──── removeNode ────
+// ---- removeNode ----
 
 describe('TreeMutate.removeNode', () => {
   it('removes a leaf node', () => {
@@ -98,7 +98,7 @@ describe('TreeMutate.removeNode', () => {
   });
 });
 
-// ──── renameNode ────
+// ---- renameNode ----
 
 describe('TreeMutate.renameNode', () => {
   it('renames a node', () => {
@@ -118,7 +118,7 @@ describe('TreeMutate.renameNode', () => {
   });
 });
 
-// ──── moveNode ────
+// ---- moveNode ----
 
 describe('TreeMutate.moveNode', () => {
   it('moves a node down among siblings', () => {
@@ -156,7 +156,7 @@ describe('TreeMutate.moveNode', () => {
   });
 });
 
-// ──── setNodeAnnotations ────
+// ---- setNodeAnnotations ----
 
 describe('TreeMutate.setNodeAnnotations', () => {
   it('sets annotations on a node', () => {
@@ -183,7 +183,7 @@ describe('TreeMutate.setNodeAnnotations', () => {
   });
 });
 
-// ──── updateAnnotationDefs ────
+// ---- updateAnnotationDefs ----
 
 describe('TreeMutate.updateAnnotationDefs', () => {
   it('replaces annotation definitions', () => {

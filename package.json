@@ -9,12 +9,11 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "build:edit": "vite build --config vite.config.edit.ts",
-    "build:admin": "vite build --config vite.config.admin.ts",
-    "build:derived-edit": "vite build --config vite.config.derived-edit.ts",
-    "build:ci": "npm run build:edit && npm run build:admin && npm run build:derived-edit",
-    "build": "npm run typecheck && npm run build:ci",
-    "forge:prepare": "node scripts/forge-prepare.mjs"
+    "build": "node scripts/build.mjs",
+    "forge:prepare": "npm run build && node scripts/forge-prepare.mjs",
+    "forge:deploy": "npm run forge:prepare && cd forge-build && forge deploy -e production --non-interactive",
+    "forge:deploy:dev": "npm run forge:prepare && cd forge-build && forge deploy -e development --non-interactive",
+    "forge:tunnel": "npm run forge:prepare && cd forge-build && forge tunnel"
   },
   "dependencies": {
     "@atlaskit/breadcrumbs": "^15.3.20",

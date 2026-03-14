@@ -4,7 +4,7 @@
  * Renders on issue-view and portal-view using UI Kit (render: native).
  * Displays resolved annotation values (e.g. principal names) as tags.
  *
- * For type: string, collection: list — the field value is string[].
+ * For type: string, collection: list - the field value is string[].
  */
 
 import type React from 'react';

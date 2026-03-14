@@ -84,7 +84,7 @@ describe('Import.transformImport', () => {
     const result = Import.transformImport(validImport, makeIdGenerator());
     const config = result._unsafeUnwrap();
 
-    // LevelId is a branded string — check the underlying value
+    // LevelId is a branded string - check the underlying value
     expect(config.levels[0]!.id as string).toBe('county');
     expect(config.levels[1]!.id as string).toBe('subcounty');
     expect(config.levels[2]!.id as string).toBe('plot');

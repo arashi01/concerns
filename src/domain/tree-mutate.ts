@@ -8,7 +8,7 @@
 import type { NodeId } from './node-id';
 import type { TreeNode, TreeConfig, AnnotationDefinition } from './types';
 
-// ──── Node-level mutations ────
+// ---- Node-level mutations ----
 
 /** Add a child node to the specified parent. Returns the new root. */
 const addNode = (root: TreeNode, parentId: NodeId, newNode: TreeNode): TreeNode => {
@@ -75,7 +75,7 @@ const setNodeAnnotations = (
   };
 };
 
-// ──── Config-level mutations ────
+// ---- Config-level mutations ----
 
 /** Replace the annotation definitions on a tree config. */
 const updateAnnotationDefs = (config: TreeConfig, annotations: readonly AnnotationDefinition[]): TreeConfig => ({

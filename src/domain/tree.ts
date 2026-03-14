@@ -1,7 +1,7 @@
 /**
  * Pure operations over tree hierarchies.
  *
- * Every function here is referentially transparent — no side effects,
+ * Every function here is referentially transparent - no side effects,
  * no mutation, no imports from @forge/* packages.
  */
 
@@ -10,7 +10,7 @@ import type { NodeId } from './node-id';
 import type { LevelId } from './level-id';
 import type { TreeNode, TreeConfig, PathSegment, ResolvedAnnotation } from './types';
 
-// ──── Lookup ────
+// ---- Lookup ----
 
 /** Find a node by ID anywhere in the tree. Returns undefined if absent. */
 const findNode = (root: TreeNode, targetId: NodeId): TreeNode | undefined => {
@@ -62,7 +62,7 @@ const childrenOf = (root: TreeNode, parentId: NodeId): readonly TreeNode[] => {
 /** Get the immediate children of the root node (top-level items). */
 const topLevel = (config: TreeConfig): readonly TreeNode[] => config.root.children;
 
-// ──── Filtering ────
+// ---- Filtering ----
 
 /** Filter children of `parentId` by their level. */
 const childrenAtLevel = (root: TreeNode, parentId: NodeId, levelId: LevelId): readonly TreeNode[] =>
@@ -114,7 +114,7 @@ const searchWithPaths = (
   return results;
 };
 
-// ──── Annotation Resolution ────
+// ---- Annotation Resolution ----
 
 /**
  * Resolve annotations for a set of selected node IDs.
@@ -132,7 +132,7 @@ const resolveAnnotations = (config: TreeConfig, selectedNodeIds: readonly NodeId
     const path = nodePath(config.root, nodeId);
     if (path.length === 0) continue;
 
-    // Skip root node — it's a virtual container
+    // Skip root node - it's a virtual container
     const userPath = path[0]?.id === config.root.id ? path.slice(1) : path;
 
     for (const def of config.annotations) {
@@ -183,7 +183,7 @@ const resolveAnnotations = (config: TreeConfig, selectedNodeIds: readonly NodeId
   }));
 };
 
-// ──── Metrics ────
+// ---- Metrics ----
 
 /** Count all nodes in the tree (excluding the root container). */
 const nodeCount = (root: TreeNode): number => {
@@ -206,7 +206,7 @@ const hasChildren = (root: TreeNode, nodeId: NodeId): boolean => {
   return node !== undefined && node.children.length > 0;
 };
 
-// ──── Validation ────
+// ---- Validation ----
 
 /** Verify that all nodes reference valid level IDs. */
 const validateLevelRefs = (config: TreeConfig): Result<TreeConfig, readonly string[]> => {

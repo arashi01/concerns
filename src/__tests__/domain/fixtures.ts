@@ -16,7 +16,7 @@ import { LevelId } from '../../domain/level-id';
 import { AnnotationKey } from '../../domain/annotation-key';
 import type { TreeConfig, TreeNode, AnnotationDefinition } from '../../domain/types';
 
-// ──── Level IDs ────
+// ---- Level IDs ----
 
 export const countyLevel = LevelId.of('county');
 export const subCountyLevel = LevelId.of('subcounty');
@@ -24,7 +24,7 @@ export const plotLevel = LevelId.of('plot');
 export const buildingLevel = LevelId.of('building');
 export const unitLevel = LevelId.of('unit');
 
-// ──── Node factory ────
+// ---- Node factory ----
 
 const mkNode = (
   id: string,
@@ -44,7 +44,7 @@ const mkNode = (
   children,
 });
 
-// ──── Plain tree (no annotations) ────
+// ---- Plain tree (no annotations) ----
 
 export const unit1 = mkNode('unit-1', 'Unit 1', unitLevel);
 export const unit2 = mkNode('unit-2', 'Unit 2', unitLevel);
@@ -72,7 +72,7 @@ export const testConfig: TreeConfig = {
   root,
 };
 
-// ──── Annotated tree ────
+// ---- Annotated tree ----
 
 export const principalKey = AnnotationKey.of('principal');
 export const managerKey = AnnotationKey.of('manager');

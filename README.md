@@ -26,8 +26,7 @@ Built on [Atlassian Forge](https://developer.atlassian.com/platform/forge/).
 
 ```bash
 npm install
-npm run build
-forge deploy -e development
+npm run forge:deploy:dev
 forge install --site <site>.atlassian.net --product jira -e development
 ```
 

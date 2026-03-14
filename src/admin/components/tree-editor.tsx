@@ -3,7 +3,7 @@
  *
  * Renders an indented tree with inline editing capabilities:
  *   - Expand/collapse per node
- *   - Inline rename (click label → textfield)
+ *   - Inline rename (click label -> textfield)
  *   - Add child node
  *   - Delete node (with confirmation)
  *   - Move up/down among siblings
@@ -23,7 +23,7 @@ import type { TreeNode, LevelDefinition, AnnotationDefinition } from '../../doma
 import { NodeId } from '../../domain/node-id';
 import { TreeMutate } from '../../domain/tree-mutate';
 
-// ──── Props ────
+// ---- Props ----
 
 interface TreeEditorProps {
   /** The full tree root (including virtual root node). */
@@ -48,7 +48,7 @@ interface NodeEditorProps {
   readonly generateId: () => string;
 }
 
-// ──── Styles ────
+// ---- Styles ----
 
 const styles = cssMap({
   nodeRow: {
@@ -60,7 +60,7 @@ const styles = cssMap({
   emptyToggle: { width: '32px' },
 });
 
-// ──── Node editor (recursive) ────
+// ---- Node editor (recursive) ----
 
 const NodeEditor: React.FC<NodeEditorProps> = ({
   node,
@@ -278,7 +278,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({
   );
 };
 
-// ──── Tree editor (entry point) ────
+// ---- Tree editor (entry point) ----
 
 export const TreeEditor: React.FC<TreeEditorProps> = ({ root, levels, annotations, onRootUpdate, generateId }) => {
   // Render children of the virtual root (the actual top-level nodes)

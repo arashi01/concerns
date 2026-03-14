@@ -10,7 +10,7 @@ import { okAsync, errAsync } from 'neverthrow';
 import { testConfig, annotatedConfig } from '../domain/fixtures';
 import type { TreeConfig, TreeSummary, TreeNode } from '../../domain/types';
 
-// ──── Mock TreeStorage ────
+// ---- Mock TreeStorage ----
 
 const mockGetTree = vi.fn();
 const mockListTrees = vi.fn();
@@ -27,7 +27,7 @@ vi.mock('../../resolvers/tree-storage', () => ({
   },
 }));
 
-// ──── Mock @forge/resolver ────
+// ---- Mock @forge/resolver ----
 
 type HandlerFn = (req: { payload: Record<string, unknown>; context: Record<string, unknown> }) => Promise<unknown>;
 
@@ -49,7 +49,7 @@ vi.mock('@forge/resolver', () => {
 // Import after mocks are set up
 await import('../../resolvers/index');
 
-// ──── Helpers ────
+// ---- Helpers ----
 
 const call = async (name: string, payload: Record<string, unknown> = {}) => {
   const handler = handlers.get(name);
@@ -70,7 +70,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-// ──── getTree ────
+// ---- getTree ----
 
 describe('getTree resolver', () => {
   it('returns tree data for valid ID', async () => {
@@ -97,7 +97,7 @@ describe('getTree resolver', () => {
   });
 });
 
-// ──── listTrees ────
+// ---- listTrees ----
 
 describe('listTrees resolver', () => {
   it('returns summaries', async () => {
@@ -114,7 +114,7 @@ describe('listTrees resolver', () => {
   });
 });
 
-// ──── saveTree ────
+// ---- saveTree ----
 
 describe('saveTree resolver', () => {
   it('saves valid tree config', async () => {
@@ -136,7 +136,7 @@ describe('saveTree resolver', () => {
   });
 });
 
-// ──── deleteTree ────
+// ---- deleteTree ----
 
 describe('deleteTree resolver', () => {
   it('deletes tree successfully', async () => {
@@ -157,7 +157,7 @@ describe('deleteTree resolver', () => {
   });
 });
 
-// ──── getChildren ────
+// ---- getChildren ----
 
 describe('getChildren resolver', () => {
   it('returns top-level children when no parentId', async () => {
@@ -186,7 +186,7 @@ describe('getChildren resolver', () => {
   });
 });
 
-// ──── searchTree ────
+// ---- searchTree ----
 
 describe('searchTree resolver', () => {
   it('returns search results for valid query', async () => {
@@ -221,7 +221,7 @@ describe('searchTree resolver', () => {
   });
 });
 
-// ──── resolveAnnotations ────
+// ---- resolveAnnotations ----
 
 describe('resolveAnnotations resolver', () => {
   it('resolves annotations for valid nodeIds', async () => {
@@ -252,7 +252,7 @@ describe('resolveAnnotations resolver', () => {
   });
 });
 
-// ──── importTree ────
+// ---- importTree ----
 
 describe('importTree resolver', () => {
   it('transforms and saves valid import format', async () => {

@@ -23,7 +23,7 @@ import {
   managerKey,
 } from './fixtures';
 
-// ──── Lookup ────
+// ---- Lookup ----
 
 describe('Tree.findNode', () => {
   it('finds a top-level node', () => {
@@ -106,7 +106,7 @@ describe('Tree.childrenAtLevel', () => {
   });
 });
 
-// ──── Search ────
+// ---- Search ----
 
 describe('Tree.search', () => {
   it('finds nodes by label substring (case-insensitive)', () => {
@@ -139,7 +139,7 @@ describe('Tree.searchWithPaths', () => {
   });
 });
 
-// ──── Metrics ────
+// ---- Metrics ----
 
 describe('Tree.nodeCount', () => {
   it('counts all non-root nodes', () => {
@@ -162,7 +162,7 @@ describe('Tree.hasChildren', () => {
   });
 });
 
-// ──── Validation ────
+// ---- Validation ----
 
 describe('Tree.validate', () => {
   it('passes for a valid config', () => {
@@ -204,7 +204,7 @@ describe('Tree.validate', () => {
   });
 });
 
-// ──── Annotation Resolution ────
+// ---- Annotation Resolution ----
 
 describe('Tree.resolveAnnotations', () => {
   it('returns empty array when config has no annotation definitions', () => {
@@ -233,7 +233,7 @@ describe('Tree.resolveAnnotations', () => {
   });
 
   it('resolves nearest: closer annotation wins over farther', () => {
-    // Add a manager annotation to Block A — it should override Plot 52's manager
+    // Add a manager annotation to Block A - it should override Plot 52's manager
     const blockWithManager: TreeNode = {
       ...annBlockA,
       annotations: {
@@ -263,11 +263,11 @@ describe('Tree.resolveAnnotations', () => {
       ...annotatedConfig,
       annotations: [{ key: principalKey, label: 'Principal', resolution: 'explicit' }],
     };
-    // Unit 1 has no annotations directly — should resolve to empty
+    // Unit 1 has no annotations directly - should resolve to empty
     const result = Tree.resolveAnnotations(explicitConfig, [NodeId.of('unit-1')]);
     expect(result[0]?.values).toEqual([]);
 
-    // Block A has principal annotations directly — should resolve
+    // Block A has principal annotations directly - should resolve
     const blockResult = Tree.resolveAnnotations(explicitConfig, [NodeId.of('block-a')]);
     expect(blockResult[0]?.values).toContain('SBS Properties Ltd');
     expect(blockResult[0]?.values).toContain('SBS Properties (2016)');

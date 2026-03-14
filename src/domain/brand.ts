@@ -3,7 +3,7 @@
  *
  * Uses a unique symbol key so branded values cannot be manually constructed
  * outside of companion `of`/`parse` functions. The brand exists only in the
- * type system — zero runtime cost.
+ * type system - zero runtime cost.
  */
 
 declare const brandSymbol: unique symbol;

@@ -20,7 +20,7 @@ import type { TreeConfig, DerivedFieldConfig, ResolvedAnnotation } from '../../d
 
 type ResolverResponse<T> = { readonly data: T } | { readonly error: string };
 
-// ──── Styles ────
+// ---- Styles ----
 
 const styles = cssMap({
   container: { padding: 'var(--ds-space-100)' },
@@ -33,7 +33,7 @@ export const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
 
-  // ──── Initialisation ────
+  // ---- Initialisation ----
   useEffect(() => {
     const init = async (): Promise<void> => {
       try {
@@ -75,7 +75,7 @@ export const App: React.FC = () => {
     void init();
   }, []);
 
-  // ──── Cross-field event listener ────
+  // ---- Cross-field event listener ----
   useEffect(() => {
     if (treeConfig === undefined || annotationKey === undefined) return;
 
@@ -110,7 +110,7 @@ export const App: React.FC = () => {
     };
   }, [treeConfig, annotationKey]);
 
-  // ──── Manual removal ────
+  // ---- Manual removal ----
   const removeValue = useCallback(
     (valueToRemove: string) => {
       const updated = values.filter(v => v !== valueToRemove);
@@ -120,7 +120,7 @@ export const App: React.FC = () => {
     [values],
   );
 
-  // ──── Render ────
+  // ---- Render ----
 
   if (loading) {
     return (

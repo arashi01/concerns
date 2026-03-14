@@ -6,11 +6,11 @@
  * the import format (ImportTree) or updated TreeConfig.
  *
  * Three CSV formats are supported:
- *   1. Tree CSV — columns are hierarchy levels, rows are paths
- *   2. Combined CSV — levels + @-prefixed annotation columns
- *   3. Annotation CSV — annotate an existing tree by path
+ *   1. Tree CSV - columns are hierarchy levels, rows are paths
+ *   2. Combined CSV - levels + @-prefixed annotation columns
+ *   3. Annotation CSV - annotate an existing tree by path
  *
- * Pure functions — no side effects, no @forge/* dependencies.
+ * Pure functions - no side effects, no @forge/* dependencies.
  */
 
 import * as Papa from 'papaparse';
@@ -18,7 +18,7 @@ import { ok, err, type Result } from 'neverthrow';
 import type { TreeConfig, TreeNode } from './types';
 import type { ImportNode, ImportTree } from './schemas';
 
-// ──── Internal helpers ────
+// ---- Internal helpers ----
 
 /** Check whether a header column represents an annotation (starts with @). */
 const isAnnotationColumn = (header: string): boolean => header.startsWith('@') && header.length > 1;
@@ -48,11 +48,11 @@ const parseCsvText = (csvText: string): Result<readonly Record<string, string>[]
   return ok(result.data);
 };
 
-// ──── Tree structure builder ────
+// ---- Tree structure builder ----
 
 /**
  * Build a tree from CSV rows where each column is a hierarchy level.
- * Deduplicates nodes by (parent-path, label) — rows sharing a
+ * Deduplicates nodes by (parent-path, label) - rows sharing a
  * common prefix share the same ancestor nodes in the output.
  */
 const buildTreeFromRows = (
@@ -167,7 +167,7 @@ const buildTreeFromRows = (
   return roots;
 };
 
-// ──── Public API ────
+// ---- Public API ----
 
 /**
  * Parse a tree CSV where columns represent hierarchy levels and
@@ -279,7 +279,7 @@ const parseAnnotationCsv = (csvText: string, existingConfig: TreeConfig): Result
   }
 
   // Build a label-based index for node lookup
-  // Maps breadcrumb string → NodeId
+  // Maps breadcrumb string -> NodeId
   const nodeByPath = new Map<string, TreeNode>();
   const indexNode = (node: TreeNode, pathParts: readonly string[]): void => {
     const currentPath = [...pathParts, node.label];
@@ -356,7 +356,7 @@ const parseAnnotationCsv = (csvText: string, existingConfig: TreeConfig): Result
   const existingKeys = new Set(existingConfig.annotations.map(a => a.key as string));
   for (const col of annotationColumns) {
     if (!existingKeys.has(col)) {
-      // This would need to be manually added — report it
+      // This would need to be manually added - report it
       errors.push(`Annotation key "${col}" not defined in tree config. Define it first or use combined CSV format.`);
     }
   }

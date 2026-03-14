@@ -22,7 +22,7 @@ interface ResolverRequest {
 
 const resolver = new Resolver();
 
-// ──── Tree CRUD ────
+// ---- Tree CRUD ----
 
 resolver.define('getTree', async (req: ResolverRequest) => {
   const treeId = TreeId.parse(req.payload['treeId']);
@@ -68,7 +68,7 @@ resolver.define('deleteTree', async (req: ResolverRequest) => {
   );
 });
 
-// ──── Tree Query (for edit UI) ────
+// ---- Tree Query (for edit UI) ----
 
 resolver.define('getChildren', async (req: ResolverRequest) => {
   const treeId = TreeId.parse(req.payload['treeId']);
@@ -111,7 +111,7 @@ resolver.define('searchTree', async (req: ResolverRequest) => {
   );
 });
 
-// ──── Annotation Resolution (for derived field) ────
+// ---- Annotation Resolution (for derived field) ----
 
 resolver.define('resolveAnnotations', async (req: ResolverRequest) => {
   const treeId = TreeId.parse(req.payload['treeId']);
@@ -133,7 +133,7 @@ resolver.define('resolveAnnotations', async (req: ResolverRequest) => {
   );
 });
 
-// ──── Import (simplified format → full TreeConfig) ────
+// ---- Import (simplified format -> full TreeConfig) ----
 
 resolver.define('importTree', async (req: ResolverRequest) => {
   const parsed = Schemas.importTree.safeParse(req.payload['tree']);

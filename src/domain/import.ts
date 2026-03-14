@@ -6,7 +6,7 @@
  * branded IDs, maps level strings to LevelId values, constructs
  * the virtual root node, and validates the resulting tree.
  *
- * Pure function — no side effects, no @forge/* dependencies.
+ * Pure function - no side effects, no @forge/* dependencies.
  * The ID generator is injected for testability.
  */
 
@@ -27,7 +27,7 @@ import { Tree } from './tree';
  * @returns The constructed TreeConfig, or validation errors
  */
 const transformImport = (input: ImportTree, generateId: () => string): Result<TreeConfig, readonly string[]> => {
-  // Build level lookup: import level id string → branded LevelId
+  // Build level lookup: import level id string -> branded LevelId
   const levelMap = new Map<string, LevelId>();
   const levels: LevelDefinition[] = [];
 

@@ -24,7 +24,7 @@ const selectionFromNode = (config: TreeConfig, nodeId: NodeId): Selection | unde
   const fullPath = Tree.pathTo(config.root, nodeId);
   if (fullPath.length === 0) return undefined;
 
-  // The root node is a virtual container — skip it in the user-facing path
+  // The root node is a virtual container - skip it in the user-facing path
   const path: readonly PathSegment[] = fullPath[0]?.nodeId === config.root.id ? fullPath.slice(1) : fullPath;
 
   const labels = path.map(seg => seg.label);

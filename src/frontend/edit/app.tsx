@@ -30,7 +30,7 @@ const LAZY_THRESHOLD = 500;
 /** Format a selection as a breadcrumb string. */
 const formatBreadcrumb = (selection: Selection): string => selection.labels.join(' \u203A ');
 
-// ──── Styles ────
+// ---- Styles ----
 
 const styles = cssMap({
   container: { padding: 'var(--ds-space-100)' },
@@ -42,7 +42,7 @@ const styles = cssMap({
 });
 
 export const App: React.FC = () => {
-  // ──── State ────
+  // ---- State ----
   const [tree, setTree] = useState<TreeConfig | undefined>(undefined);
   const [fieldValue, setFieldValue] = useState<FieldValue>(FV.empty);
   const [drillPath, setDrillPath] = useState<readonly TreeNode[]>([]);
@@ -54,7 +54,7 @@ export const App: React.FC = () => {
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const listRef = useRef<HTMLElement>(null);
 
-  // ──── Initialisation ────
+  // ---- Initialisation ----
   useEffect(() => {
     const init = async (): Promise<void> => {
       try {
@@ -104,7 +104,7 @@ export const App: React.FC = () => {
     void init();
   }, []);
 
-  // ──── Actions ────
+  // ---- Actions ----
 
   const drillInto = useCallback(
     (node: TreeNode) => {
@@ -172,7 +172,7 @@ export const App: React.FC = () => {
     [fieldValue, emitSelections],
   );
 
-  // ──── Derived state ────
+  // ---- Derived state ----
 
   const selectedNodeIds = useMemo(() => new Set(FV.selectedNodeIds(fieldValue).map(id => id as string)), [fieldValue]);
 
@@ -243,7 +243,7 @@ export const App: React.FC = () => {
     }
   }, [focusedIndex]);
 
-  // ──── Render ────
+  // ---- Render ----
 
   if (loading) {
     return (

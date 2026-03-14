@@ -11,7 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { CsvParse } from '../../domain/csv-parse';
 import { testConfig, annotatedConfig } from './fixtures';
 
-// ──── parseTreeCsv ────
+// ---- parseTreeCsv ----
 
 describe('CsvParse.parseTreeCsv', () => {
   it('parses a simple tree CSV', () => {
@@ -125,7 +125,7 @@ Mombasa,Mvita`;
   });
 });
 
-// ──── parseCombinedCsv ────
+// ---- parseCombinedCsv ----
 
 describe('CsvParse.parseCombinedCsv', () => {
   it('separates level and annotation columns', () => {
@@ -205,7 +205,7 @@ SBS,Kamau`;
   });
 });
 
-// ──── parseAnnotationCsv ────
+// ---- parseAnnotationCsv ----
 
 describe('CsvParse.parseAnnotationCsv', () => {
   it('applies annotations to matching nodes in existing tree', () => {

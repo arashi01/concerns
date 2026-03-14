@@ -2,13 +2,13 @@
  * Input sanitisation for tree configurations.
  *
  * Validates and trims user-provided data before persistence.
- * Pure functions — no side effects, no @forge/* dependencies.
+ * Pure functions - no side effects, no @forge/* dependencies.
  */
 
 import { ok, err, type Result } from 'neverthrow';
 import type { TreeConfig, TreeNode } from './types';
 
-// ──── Constants ────
+// ---- Constants ----
 
 const MAX_NAME_LENGTH = 100;
 const MAX_LABEL_LENGTH = 200;
@@ -18,7 +18,7 @@ const MAX_ANNOTATION_VALUE_LENGTH = 200;
 /** Matches ASCII control characters (C0 range, except tab/newline/carriage return). */
 const CONTROL_CHAR_RE = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
 
-// ──── Helpers ────
+// ---- Helpers ----
 
 const hasControlChars = (s: string): boolean => CONTROL_CHAR_RE.test(s);
 
@@ -33,7 +33,7 @@ const checkString = (value: string, maxLength: number, label: string, errors: st
   return trimmed;
 };
 
-// ──── Node sanitisation ────
+// ---- Node sanitisation ----
 
 const sanitiseNode = (node: TreeNode, path: string, errors: string[]): TreeNode => {
   const label = checkString(node.label, MAX_LABEL_LENGTH, `${path} label`, errors);
@@ -59,7 +59,7 @@ const sanitiseNode = (node: TreeNode, path: string, errors: string[]): TreeNode 
   return { ...node, label, metadata, annotations, children };
 };
 
-// ──── Public API ────
+// ---- Public API ----
 
 const sanitiseTreeConfig = (config: TreeConfig): Result<TreeConfig, readonly string[]> => {
   const errors: string[] = [];
