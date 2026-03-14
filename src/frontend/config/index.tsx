@@ -27,6 +27,7 @@ type ResolverResponse<T> = { data: T } | { error: string };
 const Config = (): React.JSX.Element => {
   const [trees, setTrees] = useState<readonly TreeSummary[]>([]);
   const [selectedTreeId, setSelectedTreeId] = useState<string | undefined>(undefined);
+  const [fieldId, setFieldId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -44,10 +45,9 @@ const Config = (): React.JSX.Element => {
           setTrees(treesResponse.data);
         }
 
-        const config = (context as unknown as Record<string, unknown>)['extension'] as
-          | Record<string, unknown>
-          | undefined;
-        const existingConfig = config?.['configuration'] as SelectFieldConfig | undefined;
+        const ext = (context as unknown as Record<string, unknown>)['extension'] as Record<string, unknown> | undefined;
+        setFieldId(ext?.['fieldId'] as string | undefined);
+        const existingConfig = ext?.['configuration'] as SelectFieldConfig | undefined;
         if (existingConfig?.treeId !== undefined) {
           setSelectedTreeId(existingConfig.treeId as string);
         }
@@ -63,7 +63,14 @@ const Config = (): React.JSX.Element => {
   const handleSubmit = async (): Promise<void> => {
     if (selectedTreeId === undefined) return;
     try {
-      await view.submit({ configuration: { treeId: selectedTreeId } });
+      const fieldConfig = { treeId: selectedTreeId };
+      await view.submit({ configuration: fieldConfig });
+      // Persist to KVS so Custom UI edit modules can read it via the resolver.
+      // contextConfig (render: native) has fieldId in extension context, but
+      // Custom UI edit modules cannot read context configuration directly.
+      if (fieldId !== undefined) {
+        await invoke('saveFieldConfig', { fieldId, config: fieldConfig });
+      }
     } catch (e) {
       setError(`Save failed: ${String(e)}`);
     }

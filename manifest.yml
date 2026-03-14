@@ -119,7 +119,6 @@ permissions:
     - storage:app
     - read:jira-work
     - write:jira-work
-    - manage:jira-configuration
   content:
     styles:
       - 'unsafe-inline'

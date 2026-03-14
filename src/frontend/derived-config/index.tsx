@@ -31,6 +31,7 @@ const DerivedConfig = (): React.JSX.Element => {
   const [selectedTreeId, setSelectedTreeId] = useState<string | undefined>(undefined);
   const [annotationKeys, setAnnotationKeys] = useState<readonly { key: string; label: string }[]>([]);
   const [selectedAnnotationKey, setSelectedAnnotationKey] = useState<string | undefined>(undefined);
+  const [fieldId, setFieldId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -49,10 +50,9 @@ const DerivedConfig = (): React.JSX.Element => {
           setTrees(treesResponse.data);
         }
 
-        const config = (context as unknown as Record<string, unknown>)['extension'] as
-          | Record<string, unknown>
-          | undefined;
-        const existingConfig = config?.['configuration'] as DerivedFieldConfig | undefined;
+        const ext = (context as unknown as Record<string, unknown>)['extension'] as Record<string, unknown> | undefined;
+        setFieldId(ext?.['fieldId'] as string | undefined);
+        const existingConfig = ext?.['configuration'] as DerivedFieldConfig | undefined;
         if (existingConfig?.treeId !== undefined) {
           setSelectedTreeId(existingConfig.treeId as string);
           // Load annotation keys for this tree
@@ -97,7 +97,12 @@ const DerivedConfig = (): React.JSX.Element => {
   const handleSubmit = async (): Promise<void> => {
     if (selectedTreeId === undefined || selectedAnnotationKey === undefined) return;
     try {
-      await view.submit({ configuration: { treeId: selectedTreeId, annotationKey: selectedAnnotationKey } });
+      const fieldConfig = { treeId: selectedTreeId, annotationKey: selectedAnnotationKey };
+      await view.submit({ configuration: fieldConfig });
+      // Persist to KVS so Custom UI edit modules can read it via the resolver.
+      if (fieldId !== undefined) {
+        await invoke('saveFieldConfig', { fieldId, config: fieldConfig });
+      }
     } catch (e) {
       setError(`Save failed: ${String(e)}`);
     }

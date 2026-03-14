@@ -10,6 +10,18 @@ import { okAsync, errAsync } from 'neverthrow';
 import { testConfig, annotatedConfig } from '../domain/fixtures';
 import type { TreeConfig, TreeSummary, TreeNode } from '../../domain/types';
 
+// ---- Mock @forge/kvs (used directly by field config resolvers) ----
+
+const mockKvsGet = vi.fn();
+const mockKvsSet = vi.fn();
+
+vi.mock('@forge/kvs', () => ({
+  kvs: {
+    get: (...args: unknown[]) => mockKvsGet(...args) as unknown,
+    set: (...args: unknown[]) => mockKvsSet(...args) as unknown,
+  },
+}));
+
 // ---- Mock TreeStorage ----
 
 const mockGetTree = vi.fn();
@@ -285,5 +297,74 @@ describe('importTree resolver', () => {
     };
     const result = await call('importTree', { tree: importData });
     expect(result).toEqual({ error: 'write failed' });
+  });
+});
+
+// ---- getFieldConfig ----
+
+describe('getFieldConfig resolver', () => {
+  it('returns stored config for valid fieldId', async () => {
+    const stored = { treeId: 'some-tree-id' };
+    mockKvsGet.mockResolvedValue(stored);
+    const result = await call('getFieldConfig', { fieldId: 'customfield_10020' });
+    expect(result).toEqual({ data: stored });
+    expect(mockKvsGet).toHaveBeenCalledWith('fieldConfig:customfield_10020');
+  });
+
+  it('returns undefined when no config stored', async () => {
+    mockKvsGet.mockResolvedValue(undefined);
+    const result = await call('getFieldConfig', { fieldId: 'customfield_10020' });
+    expect(result).toEqual({ data: undefined });
+  });
+
+  it('returns undefined when KVS returns null', async () => {
+    mockKvsGet.mockResolvedValue(null);
+    const result = await call('getFieldConfig', { fieldId: 'customfield_10020' });
+    expect(result).toEqual({ data: undefined });
+  });
+
+  it('returns error when fieldId is not a string', async () => {
+    const result = await call('getFieldConfig', { fieldId: 123 });
+    expect(result).toEqual({ error: 'fieldId must be a string' });
+  });
+
+  it('returns error when fieldId is missing', async () => {
+    const result = await call('getFieldConfig', {});
+    expect(result).toEqual({ error: 'fieldId must be a string' });
+  });
+});
+
+// ---- saveFieldConfig ----
+
+describe('saveFieldConfig resolver', () => {
+  it('saves config for valid fieldId', async () => {
+    mockKvsSet.mockResolvedValue(undefined);
+    const config = { treeId: 'some-tree-id' };
+    const result = await call('saveFieldConfig', { fieldId: 'customfield_10020', config });
+    expect(result).toEqual({ data: { success: true } });
+    expect(mockKvsSet).toHaveBeenCalledWith('fieldConfig:customfield_10020', config);
+  });
+
+  it('saves derived field config with annotationKey', async () => {
+    mockKvsSet.mockResolvedValue(undefined);
+    const config = { treeId: 'tree-1', annotationKey: 'principal' };
+    const result = await call('saveFieldConfig', { fieldId: 'customfield_10021', config });
+    expect(result).toEqual({ data: { success: true } });
+    expect(mockKvsSet).toHaveBeenCalledWith('fieldConfig:customfield_10021', config);
+  });
+
+  it('returns error when fieldId is not a string', async () => {
+    const result = await call('saveFieldConfig', { fieldId: 123, config: { treeId: 'x' } });
+    expect(result).toEqual({ error: 'fieldId must be a string' });
+  });
+
+  it('returns error when config is not an object', async () => {
+    const result = await call('saveFieldConfig', { fieldId: 'customfield_10020', config: 'bad' });
+    expect(result).toEqual({ error: 'config must be an object' });
+  });
+
+  it('returns error when config is null', async () => {
+    const result = await call('saveFieldConfig', { fieldId: 'customfield_10020', config: null });
+    expect(result).toEqual({ error: 'config must be an object' });
   });
 });

@@ -7,7 +7,7 @@
  */
 
 import Resolver from '@forge/resolver';
-import api, { route } from '@forge/api';
+import { kvs } from '@forge/kvs';
 import { TreeStorage } from './tree-storage';
 import { TreeId } from '../domain/tree-id';
 import { NodeId } from '../domain/node-id';
@@ -134,28 +134,35 @@ resolver.define('resolveAnnotations', async (req: ResolverRequest) => {
   );
 });
 
-// ---- Field Context Configuration (for Custom UI edit modules) ----
+// ---- Field Context Configuration (KVS bridge for Custom UI edit modules) ----
+//
+// Forge does not expose context configuration to Custom UI edit modules
+// (only to UI Kit / render:native modules). To bridge this gap, contextConfig
+// modules call saveFieldConfig when the admin saves, and edit modules call
+// getFieldConfig on load. Both use a KVS key keyed on fieldId.
+
+const fieldConfigKey = (fieldId: string): string => `fieldConfig:${fieldId}`;
 
 resolver.define('getFieldConfig', async (req: ResolverRequest) => {
   const fieldId = req.payload['fieldId'];
   if (typeof fieldId !== 'string') return { error: 'fieldId must be a string' };
 
-  const response = await api.asApp().requestJira(route`/rest/api/3/app/field/${fieldId}/context/configuration`, {
-    headers: { Accept: 'application/json' },
-  });
-
-  if (!response.ok) {
-    return { error: `Failed to read field configuration (${String(response.status)})` };
-  }
-
-  const body = (await response.json()) as Record<string, unknown>;
-  const configs = body['configurations'];
-  if (!Array.isArray(configs) || configs.length === 0) {
+  const raw: unknown = await kvs.get(fieldConfigKey(fieldId));
+  if (raw === undefined || raw === null) {
     return { data: undefined };
   }
+  return { data: raw };
+});
 
-  const first = configs[0] as Record<string, unknown> | undefined;
-  return { data: first?.['configuration'] ?? undefined };
+resolver.define('saveFieldConfig', async (req: ResolverRequest) => {
+  const fieldId = req.payload['fieldId'];
+  if (typeof fieldId !== 'string') return { error: 'fieldId must be a string' };
+
+  const config = req.payload['config'];
+  if (typeof config !== 'object' || config === null) return { error: 'config must be an object' };
+
+  await kvs.set(fieldConfigKey(fieldId), config);
+  return { data: { success: true } };
 });
 
 // ---- Import (simplified format -> full TreeConfig) ----
