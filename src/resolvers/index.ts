@@ -7,6 +7,7 @@
  */
 
 import Resolver from '@forge/resolver';
+import api, { route } from '@forge/api';
 import { TreeStorage } from './tree-storage';
 import { TreeId } from '../domain/tree-id';
 import { NodeId } from '../domain/node-id';
@@ -131,6 +132,30 @@ resolver.define('resolveAnnotations', async (req: ResolverRequest) => {
     },
     error => ({ error }),
   );
+});
+
+// ---- Field Context Configuration (for Custom UI edit modules) ----
+
+resolver.define('getFieldConfig', async (req: ResolverRequest) => {
+  const fieldId = req.payload['fieldId'];
+  if (typeof fieldId !== 'string') return { error: 'fieldId must be a string' };
+
+  const response = await api.asApp().requestJira(route`/rest/api/3/app/field/${fieldId}/context/configuration`, {
+    headers: { Accept: 'application/json' },
+  });
+
+  if (!response.ok) {
+    return { error: `Failed to read field configuration (${String(response.status)})` };
+  }
+
+  const body = (await response.json()) as Record<string, unknown>;
+  const configs = body['configurations'];
+  if (!Array.isArray(configs) || configs.length === 0) {
+    return { data: undefined };
+  }
+
+  const first = configs[0] as Record<string, unknown> | undefined;
+  return { data: first?.['configuration'] ?? undefined };
 });
 
 // ---- Import (simplified format -> full TreeConfig) ----

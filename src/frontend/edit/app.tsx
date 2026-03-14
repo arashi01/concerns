@@ -68,11 +68,21 @@ export const App: React.FC = () => {
           setFieldValue(existingValue);
         }
 
-        // Load tree config from context configuration
-        const config = ext?.['configuration'] as SelectFieldConfig | undefined;
+        // Load tree config via resolver (Custom UI does not receive contextConfig in extension context)
+        const fieldId = ext?.['fieldId'] as string | undefined;
+        const configResponse = await invoke<ResolverResponse<SelectFieldConfig | undefined>>('getFieldConfig', {
+          fieldId,
+        });
+        if ('error' in configResponse) {
+          setError(configResponse.error);
+          setLoading(false);
+          return;
+        }
+
+        const config = configResponse.data;
         if (config?.treeId === undefined) {
           setError(
-            'Field not configured. A Jira admin must assign a tree: go to Jira Settings > Issues > Custom fields, find this field, then Contexts and default values > Edit custom field config.',
+            'Field not configured. A Jira admin must assign a tree: go to Jira Settings > Fields, find this field, then Actions > Contexts and default values > Edit custom field config.',
           );
           setLoading(false);
           return;

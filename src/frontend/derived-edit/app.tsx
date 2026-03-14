@@ -46,11 +46,21 @@ export const App: React.FC = () => {
           setValues(existingValue);
         }
 
-        // Load derived field configuration
-        const config = ext?.['configuration'] as DerivedFieldConfig | undefined;
-        if (config === undefined) {
+        // Load derived field config via resolver (Custom UI does not receive contextConfig in extension context)
+        const fieldId = ext?.['fieldId'] as string | undefined;
+        const configResponse = await invoke<ResolverResponse<DerivedFieldConfig | undefined>>('getFieldConfig', {
+          fieldId,
+        });
+        if ('error' in configResponse) {
+          setError(configResponse.error);
+          setLoading(false);
+          return;
+        }
+
+        const config = configResponse.data;
+        if (config?.treeId === undefined) {
           setError(
-            'Field not configured. A Jira admin must assign a tree and annotation key: go to Jira Settings > Issues > Custom fields, find this field, then Contexts and default values > Edit custom field config.',
+            'Field not configured. A Jira admin must assign a tree and annotation key: go to Jira Settings > Fields, find this field, then Actions > Contexts and default values > Edit custom field config.',
           );
           setLoading(false);
           return;
